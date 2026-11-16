@@ -34,7 +34,15 @@ import soundfile as sf
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _ROOT)
 
-from ml.features import extract_features, FEATURE_DIM   # noqa: E402
+from ml.features import (
+    extract_features,
+    FEATURE_DIM,
+    TARGET_SR,
+    MAX_DURATION,
+    load_audio,
+    clip_or_pad,
+    compute_log_mel,
+)   # noqa: E402
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 _MODEL_PT       = os.path.join(_ROOT, "ml", "autoguard_model.pt")
@@ -44,6 +52,7 @@ _LABEL_MAP_JSON = os.path.join(_ROOT, "data", "prepared", "label_map.json")
 _cnn_model  = None   # nn.Module
 _label_map  = None   # dict[int, str]  e.g. {0: "engine_knock", 1: "healthy", 2: "misfire"}
 _n_classes  = None   # int
+_cnn_meta   = None   # dict from checkpoint metadata
 
 
 # ── Model definition (must match ml/train.py exactly) ─────────────────────────
@@ -121,7 +130,7 @@ def load_cnn() -> None:
     FileNotFoundError
         If autoguard_model.pt has not been generated yet (run ml/train.py first).
     """
-    global _cnn_model, _label_map, _n_classes
+    global _cnn_model, _label_map, _n_classes, _cnn_meta
 
     if not os.path.exists(_MODEL_PT):
         raise FileNotFoundError(
@@ -152,6 +161,7 @@ def load_cnn() -> None:
     model.eval()   # disable dropout / batch-norm train behaviour
 
     _cnn_model = model
+    _cnn_meta = meta
 
     print(f"[CNN] Loaded AutoGuardCNN  "
           f"classes={list(_label_map.values())}  "
@@ -161,6 +171,24 @@ def load_cnn() -> None:
 def is_cnn_loaded() -> bool:
     """Return True if the CNN has been loaded successfully."""
     return _cnn_model is not None
+
+
+def get_cnn_info() -> dict:
+    """Return summary metadata for the loaded PyTorch AutoGuardCNN model."""
+    if _cnn_model is None:
+        return {"loaded": False}
+    meta = _cnn_meta or {}
+    return {
+        "loaded":        True,
+        "model_name":    meta.get("model_class", "AutoGuardCNN"),
+        "classes":       list(_label_map.values()) if _label_map else [],
+        "test_accuracy": meta.get("test_accuracy"),
+        "best_epoch":    meta.get("best_epoch"),
+        "best_val_loss": meta.get("best_val_loss"),
+        "feature_dim":   meta.get("feature_dim", FEATURE_DIM),
+        "n_mels":        meta.get("n_mels", 128),
+        "n_frames":      meta.get("n_frames", 128),
+    }
 
 
 # ── Inference ──────────────────────────────────────────────────────────────────
@@ -211,11 +239,29 @@ def predict_with_cnn(audio_bytes: bytes, filename: str) -> dict:
                 "Please upload at least 0.5 seconds of engine audio."
             )
 
-        # ── 3. Extract 16 384-dim log-mel feature vector ──────────────────────
-        # extract_features() handles: load → resample → clip/pad → log-mel →
-        # normalise → flatten. Identical to ml/train.py preprocessing.
+        # ── 3. Extract 16 384-dim log-mel features (windowed if > MAX_DURATION) ─
         try:
-            feat = extract_features(tmp_path)   # shape: (16384,)
+            if duration_sec <= MAX_DURATION:
+                feature_batch = [extract_features(tmp_path)]
+            else:
+                y, sr = load_audio(tmp_path)
+                if len(y) == 0 or np.max(np.abs(y)) < 1e-6:
+                    raise ValueError(f"Audio file appears to be silent: '{filename}'")
+                win_samples = int(sr * MAX_DURATION)
+                hop_samples = max(1, win_samples // 2)
+                feature_batch = []
+                start = 0
+                while start < len(y):
+                    end = min(start + win_samples, len(y))
+                    seg = y[start:end]
+                    if len(seg) >= int(0.5 * sr) and np.max(np.abs(seg)) >= 1e-6:
+                        seg_fixed = clip_or_pad(seg, sr)
+                        feature_batch.append(compute_log_mel(seg_fixed, sr).flatten())
+                    if end == len(y):
+                        break
+                    start += hop_samples
+                if not feature_batch:
+                    raise ValueError(f"All windows were silent in '{filename}'")
         except ValueError:
             raise
         except Exception as e:
@@ -228,15 +274,14 @@ def predict_with_cnn(audio_bytes: bytes, filename: str) -> dict:
         except OSError:
             pass
 
-    # ── 4. CNN inference ──────────────────────────────────────────────────────
+    # ── 4. CNN inference (batched across windows) ─────────────────────────────
     t0 = time.perf_counter()
 
-    # Wrap in a (1, 16384) float32 tensor
-    x = torch.from_numpy(feat).float().unsqueeze(0)   # (1, 16384)
+    x = torch.from_numpy(np.stack(feature_batch)).float()   # (W, 16384)
 
     with torch.no_grad():
-        logits = _cnn_model(x)                         # (1, n_classes)
-        probs  = torch.softmax(logits, dim=1)[0]       # (n_classes,)
+        logits = _cnn_model(x)                              # (W, n_classes)
+        probs  = torch.softmax(logits, dim=1).mean(dim=0)   # (n_classes,)
 
     inference_ms = round((time.perf_counter() - t0) * 1000, 1)
 

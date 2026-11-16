@@ -128,6 +128,14 @@ def get_diagnostic_by_id(scan_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def delete_diagnostic(scan_id: int) -> bool:
+    """Delete a diagnostic record by ID. Returns True if a row was deleted."""
+    with get_connection() as conn:
+        cursor = conn.execute("DELETE FROM diagnostics WHERE id = ?", (scan_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+
+
 def get_stats() -> dict:
     """Return aggregate statistics across all diagnostic records."""
     with get_connection() as conn:

@@ -26,7 +26,7 @@ import soundfile as sf
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _ROOT)
-from ml.features import extract_features, SAMPLE_RATE, MAX_DURATION
+from ml.features import extract_features as extract_v3_features, TARGET_SR as SAMPLE_RATE, MAX_DURATION
 
 MODELS_DIR = os.path.join(_ROOT, "models")
 
@@ -35,6 +35,66 @@ _pipeline      = None
 _label_encoder = None
 _metadata      = None
 _thresholds    = None   # loaded from thresholds.json
+
+
+def _pool_stats(x: np.ndarray) -> np.ndarray:
+    """Return [mean, std] pooled across time axis for v2 288-dim MFCC features."""
+    if x.ndim == 1:
+        return np.array([x.mean(), x.std()], dtype=np.float32)
+    return np.concatenate([x.mean(axis=1), x.std(axis=1)]).astype(np.float32)
+
+
+def _extract_v2_mfcc_features_from_array(y: np.ndarray, sr: int) -> np.ndarray:
+    """
+    Extract the 288-dim MFCC + Delta + Delta2 + Spectral Contrast + Chroma +
+    ZCR/RMS/Centroid/Rolloff/Bandwidth feature vector expected by models/best_model.pkl (v2).
+    """
+    if len(y) == 0:
+        raise ValueError("Audio segment is empty")
+    if np.max(np.abs(y)) < 1e-6:
+        raise ValueError("Audio segment appears to be silent")
+
+    librosa = __import__("librosa")
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
+    delta_mfcc = librosa.feature.delta(mfcc, order=1)
+    delta2_mfcc = librosa.feature.delta(mfcc, order=2)
+    contrast = librosa.feature.spectral_contrast(y=y, sr=sr, n_bands=6)
+    chroma = librosa.feature.chroma_stft(y=y, sr=sr, n_chroma=12)
+    zcr = librosa.feature.zero_crossing_rate(y)
+    rms = librosa.feature.rms(y=y)
+    centroid = librosa.feature.spectral_centroid(y=y, sr=sr)
+    rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
+    bandwidth = librosa.feature.spectral_bandwidth(y=y, sr=sr)
+
+    return np.concatenate([
+        _pool_stats(mfcc),
+        _pool_stats(delta_mfcc),
+        _pool_stats(delta2_mfcc),
+        _pool_stats(contrast),
+        _pool_stats(chroma),
+        _pool_stats(zcr),
+        _pool_stats(rms),
+        _pool_stats(centroid),
+        _pool_stats(rolloff),
+        _pool_stats(bandwidth),
+    ]).astype(np.float32)
+
+
+def _extract_v2_mfcc_features(audio_path: str) -> np.ndarray:
+    """Load an audio path and extract the v2 288-dim MFCC + spectral feature vector."""
+    librosa = __import__("librosa")
+    y, sr = librosa.load(audio_path, sr=int(SAMPLE_RATE), duration=float(MAX_DURATION), mono=True)
+    return _extract_v2_mfcc_features_from_array(y, sr)
+
+
+def _extract_model_features(audio_path: str) -> np.ndarray:
+    """Select v2 (288-dim) or v3 (16384-dim) feature extraction based on loaded pipeline."""
+    expected_dim = getattr(_pipeline, "n_features_in_", None)
+    if expected_dim is None and _metadata:
+        expected_dim = _metadata.get("feature_config", {}).get("feature_dim")
+    if expected_dim == 288:
+        return _extract_v2_mfcc_features(audio_path)
+    return extract_v3_features(audio_path)
 
 
 # ── Loading ───────────────────────────────────────────────────────────────────
@@ -87,7 +147,7 @@ def warmup_model() -> None:
         sf.write(tmp_path, dummy, int(SAMPLE_RATE))
         # warmup will raise ValueError (silent audio) — that's fine
         try:
-            feat = extract_features(tmp_path)
+            feat = _extract_model_features(tmp_path)
             _pipeline.predict(feat.reshape(1, -1))
         except ValueError:
             pass
@@ -109,11 +169,13 @@ def get_model_info() -> dict:
     if _metadata is None:
         return {"loaded": False}
     return {
-        "loaded":        True,
-        "model_name":    _metadata["model_name"],
-        "classes":       _metadata["classes"],
-        "test_accuracy": _metadata["test_metrics"]["accuracy"],
-        "test_macro_f1": _metadata["test_metrics"]["macro_f1"],
+        "loaded":            True,
+        "model_name":        _metadata["model_name"],
+        "classes":           _metadata["classes"],
+        "test_accuracy":     _metadata["test_metrics"]["accuracy"],
+        "test_macro_f1":     _metadata["test_metrics"]["macro_f1"],
+        "abstain_threshold": (_thresholds or {}).get("abstain_threshold", 0.75),
+        "disagree_threshold": (_thresholds or {}).get("disagree_threshold", 0.20),
     }
 
 
@@ -146,17 +208,30 @@ def _window_audio(y: np.ndarray, sr: int, win_sec: float, hop_frac: float = 0.5)
 
 def _predict_array(y: np.ndarray, sr: int, tmp_dir: str, window_idx: int) -> np.ndarray:
     """
-    Write a numpy audio array to a temp WAV, extract features, return proba vector.
+    Extract features for a numpy audio window and return proba vector.
     Returns None if the window is silent or too short.
     """
+    expected_dim = getattr(_pipeline, "n_features_in_", None)
+    if expected_dim is None and _metadata:
+        expected_dim = _metadata.get("feature_config", {}).get("feature_dim")
+
+    if expected_dim == 288:
+        try:
+            feat = _extract_v2_mfcc_features_from_array(y, sr)
+        except ValueError:
+            return None
+        proba = _pipeline.predict_proba(feat.reshape(1, -1))[0]
+        return np.array(proba, dtype=np.float64)
+
     tmp_path = os.path.join(tmp_dir, f"win_{window_idx}.wav")
     try:
         sf.write(tmp_path, y, int(sr))
-        feat = extract_features(tmp_path)
+        try:
+            feat = _extract_model_features(tmp_path)
+        except ValueError:
+            return None   # silent or too-short window
         proba = _pipeline.predict_proba(feat.reshape(1, -1))[0]
         return np.array(proba, dtype=np.float64)
-    except ValueError:
-        return None   # silent or too-short window
     finally:
         try:
             os.unlink(tmp_path)

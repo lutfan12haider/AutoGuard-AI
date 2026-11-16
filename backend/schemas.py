@@ -75,6 +75,7 @@ class HealthResponse(BaseModel):
     """Response from GET /health"""
     status:      str
     model:       dict
+    cnn:         dict = {}
     database:    str
     version:     str
 
@@ -92,3 +93,5 @@ class DiagnoseResult(BaseModel):
     duration_sec:      float
     inference_ms:      float
     model:             str = "AutoGuardCNN"
+    scan_id:           Optional[int] = None
+    created_at:        Optional[str] = None
