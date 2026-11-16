@@ -1,10 +1,19 @@
+# Environments and Cache
 venv/
 __pycache__/
 *.pyc
+.env
+node_modules/
+
+# AutoGuard AI Datasets (Raw data folders)
+data/kwerimoto/
+data/kaggledataset/
+
+# Prepared ML outputs & temporary cache
 data/**/.cache/
 data/**/prepared/
+
+# Global Media Formats
 *.wav
 *.mp3
 *.flac
-.env
-node_modules/
