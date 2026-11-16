@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+data/**/.cache/
+data/**/prepared/
+*.wav
+*.mp3
+*.flac
+.env
+node_modules/
