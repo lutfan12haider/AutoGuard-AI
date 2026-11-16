@@ -30,7 +30,8 @@ sys.path.insert(0, _ROOT)
 
 from backend.database import init_db, insert_diagnostic, get_all_diagnostics, get_diagnostic_by_id, get_stats
 from backend.model import load_model, warmup_model, is_model_loaded, get_model_info, predict_audio
-from backend.schemas import AnalysisResult, DiagnosticRecord, HistoryResponse, StatsResponse, HealthResponse
+from backend.schemas import AnalysisResult, DiagnosticRecord, HistoryResponse, StatsResponse, HealthResponse, DiagnoseResult
+from backend.cnn_model import load_cnn, predict_with_cnn, is_cnn_loaded
 
 # ── Supported file types ───────────────────────────────────────────────────────
 ALLOWED_CONTENT_TYPES = {
@@ -55,8 +56,11 @@ async def lifespan(app: FastAPI):
         load_model()
         warmup_model()
     except FileNotFoundError as e:
-        # Server starts even without a model — /health will report it
         print(f"[Startup] WARNING: {e}")
+    try:
+        load_cnn()
+    except FileNotFoundError as e:
+        print(f"[Startup] WARNING (CNN): {e}")
     print("[Startup] Ready.")
     yield
     # (cleanup on shutdown goes here if needed)
@@ -263,6 +267,47 @@ async def get_dashboard_stats():
         healthy_results = stats.get("healthy_results", 0) or 0,
         knock_results   = stats.get("knock_results", 0) or 0,
         misfire_results = stats.get("misfire_results", 0) or 0,
+    )
+
+
+@app.post("/api/diagnose", response_model=DiagnoseResult, tags=["Diagnosis"])
+async def diagnose_audio(file: UploadFile = File(...)):
+    """
+    Accept a WAV or MP3 file, run the PyTorch CNN model, and return the
+    predicted engine condition with per-class confidence scores.
+
+    This endpoint uses the trained AutoGuardCNN (ml/autoguard_model.pt)
+    rather than the SVM pipeline used by /api/analyze.
+
+    Steps:
+      1. Validate the uploaded file (extension, size).
+      2. Save to a temporary file so extract_features() can read it.
+      3. Extract the 16 384-dim log-mel feature vector.
+      4. Pass through AutoGuardCNN, compute softmax probabilities.
+      5. Map the predicted index to a human-readable class name via label_map.json.
+      6. Return prediction and confidence_scores.
+    """
+    if not is_cnn_loaded():
+        raise HTTPException(
+            status_code=503,
+            detail="PyTorch CNN model is not loaded. Run ml/train.py first.",
+        )
+
+    data = await file.read()
+    _validate_upload(file, data)
+
+    try:
+        result = predict_with_cnn(data, file.filename)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"CNN inference error: {e}")
+
+    return DiagnoseResult(
+        prediction        = result["prediction"],
+        confidence_scores = result["confidence_scores"],
+        duration_sec      = result["duration_sec"],
+        inference_ms      = result["inference_ms"],
     )
 
 

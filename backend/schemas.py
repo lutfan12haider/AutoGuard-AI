@@ -83,3 +83,12 @@ class ErrorResponse(BaseModel):
     """Standard error response"""
     error:   str
     detail:  Optional[str] = None
+
+
+class DiagnoseResult(BaseModel):
+    """Response from POST /api/diagnose  (PyTorch CNN model)"""
+    prediction:        str                  # human-readable class name
+    confidence_scores: dict[str, float]     # {class_name: probability}  sums to 1.0
+    duration_sec:      float
+    inference_ms:      float
+    model:             str = "AutoGuardCNN"
