@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Check, FileAudio, Plus, Printer, ShieldAlert } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  CheckCircle2,
+  ClipboardCheck,
+  FileAudio,
+  Info,
+  Plus,
+  Printer,
+  ShieldAlert,
+  Stethoscope,
+  Wrench,
+} from "lucide-react";
 import type {
   AppPage,
   AudioAnalysisMetrics,
@@ -7,16 +19,16 @@ import type {
   UnifiedDiagnosticReport,
 } from "../types/diagnostic";
 import {
+  buildClientRepairRecommendations,
   formatDuration,
   formatTimestamp,
-  getConditionMeta,
   predictionToLabel,
   predictionToTone,
 } from "../services/api";
 import { ConditionIcon, ConfidenceGauge, StatusBadge } from "../components/StatusBadge";
 import { EngineSchematic } from "../components/EngineSchematic";
 import { SpectrogramWorkbench } from "../components/SpectrogramWorkbench";
-import { Button, Card, EmptyState, Stepper } from "../components/ui";
+import { Badge, Button, Card, EmptyState, Stepper } from "../components/ui";
 
 export function ResultsPage({
   report,
@@ -31,7 +43,7 @@ export function ResultsPage({
   colormap: SpectrogramColormap;
   onNavigate: (p: AppPage) => void;
 }) {
-  const [checkedSteps, setCheckedSteps] = useState<Record<number, boolean>>({});
+  const [checkedInspections, setCheckedInspections] = useState<Record<number, boolean>>({});
 
   if (!report) {
     return (
@@ -50,16 +62,66 @@ export function ResultsPage({
     );
   }
 
-  const tone = predictionToTone(report.prediction);
-  const label = predictionToLabel(report.prediction);
-  const meta = getConditionMeta(report.prediction);
+  // Ensure structured recommendations are always present
+  const fallbackRecs = buildClientRepairRecommendations(
+    report.prediction,
+    report.confidence,
+    report.uncertain,
+    report.uncertain_reason,
+    report.disagree_std
+  );
+
+  const confidenceTier = report.confidence_tier || fallbackRecs.confidence_tier;
+  const isLowConfidence = confidenceTier === "low";
+  const isModerateConfidence = confidenceTier === "moderate";
+  const isUnsupported = confidenceTier === "unsupported";
+  const isHealthy = report.prediction === "healthy" && !isLowConfidence && !isUnsupported;
+
+  const uncertaintyWarning = report.uncertainty_warning ?? fallbackRecs.uncertainty_warning;
+  const diagnosisOverview = report.diagnosis_overview?.length
+    ? report.diagnosis_overview
+    : fallbackRecs.diagnosis_overview;
+  const possibleCauses = report.possible_causes ?? fallbackRecs.possible_causes;
+  const recommendedInspections = report.recommended_inspections?.length
+    ? report.recommended_inspections
+    : fallbackRecs.recommended_inspections;
+  const possibleRepairs = report.possible_repairs ?? fallbackRecs.possible_repairs;
+  const safetyWarning = report.safety_warning ?? fallbackRecs.safety_warning;
+  const maintenanceAdvice = report.maintenance_advice?.length
+    ? report.maintenance_advice
+    : fallbackRecs.maintenance_advice;
+  const disclaimer =
+    report.disclaimer ??
+    fallbackRecs.disclaimer ??
+    "ML acoustic confidence is a screening indicator and is never proof of a specific mechanical fault.";
+
+  const tone = isLowConfidence ? "uncertain" : predictionToTone(report.prediction);
+  const label = isLowConfidence
+    ? "Inconclusive / Low Confidence"
+    : isUnsupported
+      ? "Unsupported Audio"
+      : predictionToLabel(report.prediction);
+
   const confPct = Math.round(report.confidence * 100);
   const { date, time } = formatTimestamp(report.created_at);
 
+  const tierBadgeTone: Record<string, "healthy" | "warning" | "fault" | "accent"> = {
+    high: "healthy",
+    moderate: "warning",
+    low: "fault",
+    unsupported: "fault",
+  };
+  const tierLabel: Record<string, string> = {
+    high: "High Confidence",
+    moderate: "Moderate Confidence",
+    low: "Low Confidence",
+    unsupported: "Unsupported Audio",
+  };
+
   const sortedScores: Array<[string, string, number, string]> = [
-    ["engine_knock", "Engine Knock", report.class_scores.engine_knock ?? 0, "bg-[#D97706]"],
-    ["healthy", "Healthy Engine", report.class_scores.healthy ?? 0, "bg-[#16A34A]"],
-    ["misfire", "Engine Misfire", report.class_scores.misfire ?? 0, "bg-[#DC2626]"],
+    ["engine_knock", "Engine Knocking", report.class_scores.engine_knock ?? 0, "bg-[#F59E0B]"],
+    ["healthy", "Healthy", report.class_scores.healthy ?? 0, "bg-[#22C55E]"],
+    ["misfire", "Misfire", report.class_scores.misfire ?? 0, "bg-[#EF4444]"],
   ];
   sortedScores.sort((a, b) => b[2] - a[2]);
 
@@ -68,10 +130,10 @@ export function ResultsPage({
       {/* Header & Stepper */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#0F172A] leading-tight">
-            Engine check results
+          <h2 className="text-[28px] font-semibold text-[#F8FAFC] leading-tight">
+            Diagnostic & Repair Recommendation Report
           </h2>
-          <p className="text-[14px] text-[#64748B] mt-1">{report.filename}</p>
+          <p className="text-[14px] text-[#94A3B8] mt-1">{report.filename}</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -88,139 +150,366 @@ export function ResultsPage({
         <Stepper steps={["Add audio", "Review", "Results"]} activeStep={2} />
       </div>
 
-      {/* Main Verdict Card */}
-      <Card className="p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-        <div className="lg:col-span-8 space-y-4">
-          <StatusBadge prediction={report.prediction} shortLabel />
-
-          <div className="flex items-start gap-3.5">
-            <div className="h-11 w-11 rounded-[10px] bg-[#FAFAF9] border border-[#E7E5E4] flex items-center justify-center shrink-0">
-              <ConditionIcon prediction={report.prediction} size={22} />
+      {/* ════════════════════════════════════════════════════════════════════════
+          SECTION 1: DIAGNOSIS OVERVIEW
+         ════════════════════════════════════════════════════════════════════════ */}
+      <section aria-labelledby="section-diagnosis-overview">
+        <Card className="p-6 lg:p-8 space-y-6">
+          <div className="flex items-center justify-between flex-wrap gap-3 border-b border-[#1E293B] pb-4">
+            <div className="flex items-center gap-2.5">
+              <Stethoscope size={18} strokeWidth={1.5} className="text-[#38BDF8]" />
+              <h3 id="section-diagnosis-overview" className="text-[18px] font-semibold text-[#F8FAFC]">
+                Diagnosis Overview
+              </h3>
             </div>
-            <div>
-              <h3 className="text-[24px] font-semibold text-[#0F172A] leading-snug">{label}</h3>
-              <p className="text-[14px] text-[#475569] mt-0.5">{meta.headline}</p>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {!isLowConfidence && <StatusBadge prediction={report.prediction} />}
+              <Badge tone={tierBadgeTone[confidenceTier] || "accent"} dot>
+                {tierLabel[confidenceTier] || "Confidence"} ({confPct}%)
+              </Badge>
             </div>
           </div>
 
-          <p className="text-[14px] text-[#64748B] leading-relaxed max-w-2xl">{meta.description}</p>
-
-          <div className="pt-3 border-t border-[#E7E5E4] flex items-center flex-wrap gap-x-6 gap-y-2 text-[13px] text-[#64748B]">
-            <span className="inline-flex items-center gap-1.5 text-[#0F172A] font-medium">
-              <FileAudio size={15} strokeWidth={1.5} className="text-[#4F46E5]" />
-              {report.filename}
-            </span>
-            <span className="font-mono-data">{formatDuration(report.duration_sec)}</span>
-            <span>{date} · {time}</span>
-          </div>
-        </div>
-
-        <div className="lg:col-span-4 flex flex-col items-center justify-center lg:border-l border-[#E7E5E4] lg:pl-6">
-          <ConfidenceGauge valuePct={confPct} tone={tone} label="Confidence" size={160} />
-        </div>
-      </Card>
-
-      {/* Engine Diagram + Condition Likelihood */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <Card className="lg:col-span-7 p-6 space-y-4">
-          <div>
-            <h3 className="text-[16px] font-semibold text-[#0F172A]">Where to check</h3>
-            <p className="text-[13px] text-[#64748B] mt-0.5">
-              Click any engine area below to see what to look for.
-            </p>
-          </div>
-          <EngineSchematic condition={report.prediction} />
-        </Card>
-
-        <Card className="lg:col-span-5 p-6 flex flex-col justify-between gap-6">
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-[16px] font-semibold text-[#0F172A]">Sound breakdown</h3>
-              <p className="text-[13px] text-[#64748B] mt-0.5">
-                How closely the clip matches each condition.
-              </p>
+          {/* Uncertainty Warning Banner (Moderate or Low Confidence) */}
+          {uncertaintyWarning && (
+            <div
+              className={`rounded-[10px] border p-4 flex items-start gap-3 ${
+                isLowConfidence || isUnsupported
+                  ? "border-[#EF4444]/40 bg-[#EF4444]/10 text-[#FCA5A5]"
+                  : "border-[#F59E0B]/40 bg-[#F59E0B]/10 text-[#FDE68A]"
+              }`}
+            >
+              <AlertTriangle size={18} strokeWidth={1.5} className="shrink-0 mt-0.5" />
+              <div className="space-y-1 text-[13px] leading-relaxed">
+                <div className="font-semibold">
+                  {isLowConfidence
+                    ? "Low Confidence — No Definitive Fault-Specific Diagnosis"
+                    : isModerateConfidence
+                      ? "Moderate Confidence — Uncertainty Advisory"
+                      : "Audio Notice"}
+                </div>
+                <p>{uncertaintyWarning}</p>
+              </div>
             </div>
+          )}
 
-            <div className="space-y-4">
-              {sortedScores.map(([key, name, score, barCls]) => {
-                const pct = Math.round(score * 100);
-                return (
-                  <div key={key} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="font-medium text-[#0F172A]">{name}</span>
-                      <span className="font-mono-data font-semibold text-[#0F172A]">{pct}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-[#F5F5F4] overflow-hidden">
-                      <div className={`h-full rounded-full ${barCls}`} style={{ width: `${pct}%` }} />
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div className="lg:col-span-8 space-y-4">
+              <div className="flex items-start gap-3.5">
+                <div className="h-12 w-12 rounded-[10px] bg-[#090D16] border border-[#1E293B] flex items-center justify-center shrink-0">
+                  <ConditionIcon
+                    prediction={isLowConfidence ? "uncertain" : report.prediction}
+                    size={24}
+                  />
+                </div>
+                <div>
+                  <div className="text-[12px] uppercase tracking-wider font-mono-data text-[#94A3B8]">
+                    Prediction
                   </div>
-                );
-              })}
+                  <h4 className="text-[24px] font-semibold text-[#F8FAFC] leading-snug">{label}</h4>
+                </div>
+              </div>
+
+              {/* Overview Bullet Points (Matches Healthy 4 points verbatim when Healthy) */}
+              <ul className="space-y-2.5 pt-1">
+                {diagnosisOverview.map((line, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-[14px] text-[#CBD5E1]">
+                    <CheckCircle2
+                      size={16}
+                      strokeWidth={1.5}
+                      className={`shrink-0 mt-0.5 ${
+                        isHealthy
+                          ? "text-[#4ADE80]"
+                          : isLowConfidence
+                            ? "text-[#38BDF8]"
+                            : "text-[#FBBF24]"
+                      }`}
+                    />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Non-100%-healthy / ML non-proof note */}
+              <div className="rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3.5 py-2.5 flex items-start gap-2.5 text-[12px] text-[#94A3B8]">
+                <Info size={15} strokeWidth={1.5} className="text-[#38BDF8] shrink-0 mt-0.5" />
+                <span>
+                  {isHealthy
+                    ? "Note: Audio analysis evaluates only supported engine sound classes (healthy, misfire, engine_knock) and does not confirm that the entire vehicle is 100% healthy."
+                    : disclaimer}
+                </span>
+              </div>
+
+              <div className="pt-3 border-t border-[#1E293B] flex items-center flex-wrap gap-x-6 gap-y-2 text-[13px] text-[#94A3B8]">
+                <span className="inline-flex items-center gap-1.5 text-[#F8FAFC] font-medium">
+                  <FileAudio size={15} strokeWidth={1.5} className="text-[#38BDF8]" />
+                  {report.filename}
+                </span>
+                <span className="font-mono-data">{formatDuration(report.duration_sec)}</span>
+                <span>
+                  {date} · {time}
+                </span>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 flex flex-col items-center justify-center lg:border-l border-[#1E293B] lg:pl-6 gap-4">
+              <ConfidenceGauge
+                valuePct={confPct}
+                tone={tone}
+                label="ML Confidence"
+                sublabel={tierLabel[confidenceTier]}
+                size={160}
+              />
+
+              <div className="w-full space-y-2.5 pt-2 border-t border-[#1E293B]">
+                {sortedScores.map(([key, name, score, barCls]) => {
+                  const pct = Math.round(score * 100);
+                  return (
+                    <div key={key} className="space-y-1">
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-[#CBD5E1]">{name}</span>
+                        <span className="font-mono-data text-[#F8FAFC] font-semibold">{pct}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-[#1E293B] overflow-hidden">
+                        <div className={`h-full rounded-full ${barCls}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-
-          <p className="text-[12px] text-[#64748B] pt-4 border-t border-[#E7E5E4]">
-            AutoGuard AI is a screening guide. Always confirm mechanical repairs with a trusted mechanic.
-          </p>
         </Card>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          SECTION 2 & 3: POSSIBLE CAUSES + RECOMMENDED INSPECTIONS
+         ════════════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* SECTION 2: POSSIBLE CAUSES */}
+        <section aria-labelledby="section-possible-causes" className="lg:col-span-6 flex">
+          <Card className="p-6 flex-1 flex flex-col justify-between space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
+                <div className="flex items-center gap-2.5">
+                  <AlertTriangle size={18} strokeWidth={1.5} className="text-[#FBBF24]" />
+                  <h3 id="section-possible-causes" className="text-[16px] font-semibold text-[#F8FAFC]">
+                    Possible Causes
+                  </h3>
+                </div>
+                <span className="text-[12px] text-[#94A3B8]">Acoustic screening candidates</span>
+              </div>
+
+              {possibleCauses.length > 0 ? (
+                <ul className="space-y-3">
+                  {possibleCauses.map((cause, idx) => (
+                    <li
+                      key={idx}
+                      className="rounded-[10px] border border-[#1E293B] bg-[#090D16] px-4 py-3 flex items-start gap-3 text-[14px] text-[#F8FAFC]"
+                    >
+                      <span className="h-5 w-5 rounded-full bg-[#F59E0B]/15 border border-[#F59E0B]/35 text-[#FBBF24] font-mono-data text-[11px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <span>{cause}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="rounded-[10px] border border-[#1E293B] bg-[#090D16] p-5 space-y-2 text-[14px] text-[#CBD5E1]">
+                  {isHealthy ? (
+                    <>
+                      <div className="font-semibold text-[#4ADE80]">
+                        No supported fault pattern was identified.
+                      </div>
+                      <p className="text-[13px] text-[#94A3B8]">
+                        The engine sound appears consistent with the healthy class. No misfire or engine knocking causes are flagged.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-semibold text-[#F8FAFC]">
+                        Fault-specific causes withheld (low confidence)
+                      </div>
+                      <p className="text-[13px] text-[#94A3B8]">
+                        Because prediction confidence is below the minimum threshold, AutoGuard AI does not assign fault-specific causes to this recording.
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <p className="text-[12px] text-[#94A3B8] pt-3 border-t border-[#1E293B]">
+              Sound patterns alone cannot prove a specific part has failed. Physical testing is required.
+            </p>
+          </Card>
+        </section>
+
+        {/* SECTION 3: RECOMMENDED INSPECTIONS */}
+        <section aria-labelledby="section-recommended-inspections" className="lg:col-span-6 flex">
+          <Card className="p-6 flex-1 flex flex-col justify-between space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
+                <div className="flex items-center gap-2.5">
+                  <ClipboardCheck size={18} strokeWidth={1.5} className="text-[#38BDF8]" />
+                  <h3 id="section-recommended-inspections" className="text-[16px] font-semibold text-[#F8FAFC]">
+                    Recommended Inspections
+                  </h3>
+                </div>
+                <span className="text-[12px] text-[#94A3B8]">Click items to mark checked</span>
+              </div>
+
+              <div className="space-y-2.5">
+                {recommendedInspections.map((item, idx) => {
+                  const done = Boolean(checkedInspections[idx]);
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() =>
+                        setCheckedInspections((prev) => ({ ...prev, [idx]: !prev[idx] }))
+                      }
+                      className={`w-full rounded-[10px] border px-4 py-3 text-left transition-all flex items-center justify-between gap-3 ${
+                        done
+                          ? "border-[#22C55E]/40 bg-[#22C55E]/10 text-[#94A3B8]"
+                          : "border-[#1E293B] bg-[#090D16] hover:border-[#334155] text-[#F8FAFC]"
+                      }`}
+                    >
+                      <span className={`text-[14px] ${done ? "line-through" : ""}`}>{item}</span>
+                      <span
+                        className={`h-5 w-5 rounded-[6px] border flex items-center justify-center shrink-0 transition-colors ${
+                          done
+                            ? "border-[#22C55E] bg-[#22C55E] text-[#090D16]"
+                            : "border-[#334155] bg-[#111827]"
+                        }`}
+                      >
+                        {done && <Check size={12} strokeWidth={2.5} />}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="text-[12px] text-[#94A3B8] pt-3 border-t border-[#1E293B]">
+              Verify each item systematically before replacing any components.
+            </p>
+          </Card>
+        </section>
       </div>
 
-      {/* Audio Replay (when checked in-session) */}
-      {audioFile && audioMetrics && (
-        <SpectrogramWorkbench
-          file={audioFile}
-          metrics={audioMetrics}
-          colormap={colormap}
-          showSpectrogram={false}
-        />
-      )}
+      {/* ════════════════════════════════════════════════════════════════════════
+          SECTION 4: POSSIBLE REPAIRS (AND MAINTENANCE ADVICE)
+         ════════════════════════════════════════════════════════════════════════ */}
+      <section aria-labelledby="section-possible-repairs">
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-[#1E293B] pb-3">
+            <div className="flex items-center gap-2.5">
+              <Wrench size={18} strokeWidth={1.5} className="text-[#38BDF8]" />
+              <h3 id="section-possible-repairs" className="text-[16px] font-semibold text-[#F8FAFC]">
+                Possible Repairs
+              </h3>
+            </div>
+            <span className="text-[12px] text-[#94A3B8]">
+              Perform repairs only after physical inspection confirms a fault
+            </span>
+          </div>
 
-      {/* Recommended Next Steps Checklist */}
-      <Card className="p-6 space-y-4">
-        <div>
-          <h3 className="text-[16px] font-semibold text-[#0F172A]">
-            {report.prediction === "healthy"
-              ? "How to keep your engine healthy"
-              : "How to overcome this issue"}
-          </h3>
-          <p className="text-[13px] text-[#64748B] mt-0.5">
-            Practical steps based on this {label.toLowerCase()} diagnosis.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {meta.steps.map((step, idx) => {
-            const done = Boolean(checkedSteps[idx]);
-            return (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCheckedSteps((prev) => ({ ...prev, [idx]: !prev[idx] }))}
-                className={`rounded-[10px] border p-4 text-left transition-all flex flex-col gap-2 ${
-                  done
-                    ? "border-[#BBF7D0] bg-[#F0FDF4]/60"
-                    : "border-[#E7E5E4] bg-[#FAFAF9]/60 hover:border-[#D6D3D1]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono-data text-[12px] text-[#64748B]">Step {idx + 1}</span>
-                  <span
-                    className={`h-5 w-5 rounded-[6px] border flex items-center justify-center transition-colors ${
-                      done ? "border-[#16A34A] bg-[#16A34A] text-white" : "border-[#D6D3D1] bg-white"
-                    }`}
-                  >
-                    {done && <Check size={12} strokeWidth={2} />}
+          {possibleRepairs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {possibleRepairs.map((repair, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-[10px] border border-[#1E293B] bg-[#090D16] p-4 flex items-start gap-3"
+                >
+                  <span className="h-6 w-6 rounded-[6px] bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                    {idx + 1}
                   </span>
+                  <span className="text-[14px] text-[#F8FAFC] leading-relaxed">{repair}</span>
                 </div>
-                <div className={`text-[14px] font-semibold ${done ? "line-through text-[#64748B]" : "text-[#0F172A]"}`}>
-                  {step.title}
-                </div>
-                <p className="text-[13px] text-[#64748B] leading-relaxed">{step.detail}</p>
-              </button>
-            );
-          })}
-        </div>
-      </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[10px] border border-[#1E293B] bg-[#090D16] p-5 space-y-3">
+              <div className="text-[14px] font-semibold text-[#F8FAFC]">
+                {isHealthy
+                  ? "No fault-specific repairs required — Routine Maintenance Advice"
+                  : "No definitive repair actions recommended from this recording"}
+              </div>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {maintenanceAdvice.map((advice, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-[13px] text-[#CBD5E1]">
+                    <CheckCircle2 size={15} strokeWidth={1.5} className="text-[#4ADE80] shrink-0" />
+                    <span>{advice}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Card>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          SECTION 5: SAFETY ADVISORY
+         ════════════════════════════════════════════════════════════════════════ */}
+      <section aria-labelledby="section-safety-advisory">
+        <Card
+          className={`p-6 border ${
+            report.prediction === "misfire" || report.prediction === "engine_knock"
+              ? "border-[#EF4444]/45 bg-[#EF4444]/10"
+              : "border-[#38BDF8]/35 bg-[#111827]"
+          }`}
+        >
+          <div className="flex items-start gap-3.5">
+            <div
+              className={`h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0 ${
+                report.prediction === "misfire" || report.prediction === "engine_knock"
+                  ? "bg-[#EF4444]/20 text-[#F87171] border border-[#EF4444]/40"
+                  : "bg-[#0EA5E9]/15 text-[#38BDF8] border border-[#38BDF8]/35"
+              }`}
+            >
+              <ShieldAlert size={20} strokeWidth={1.75} />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 id="section-safety-advisory" className="text-[16px] font-semibold text-[#F8FAFC]">
+                Safety Advisory
+              </h3>
+              <p className="text-[14px] text-[#F8FAFC] font-medium leading-relaxed">
+                {safetyWarning}
+              </p>
+              <p className="text-[12px] text-[#94A3B8]">
+                {disclaimer}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      {/* Interactive Engine Subsystem Schematic & Audio Replay */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <Card className={`${audioFile && audioMetrics ? "lg:col-span-7" : "lg:col-span-12"} p-6 space-y-4`}>
+          <div>
+            <h3 className="text-[16px] font-semibold text-[#F8FAFC]">Interactive Engine Subsystem Map</h3>
+            <p className="text-[13px] text-[#94A3B8] mt-0.5">
+              Select an engine region below to view inspection context for {label}.
+            </p>
+          </div>
+          <EngineSchematic condition={isLowConfidence ? "uncertain" : report.prediction} />
+        </Card>
+
+        {audioFile && audioMetrics && (
+          <div className="lg:col-span-5">
+            <SpectrogramWorkbench
+              file={audioFile}
+              metrics={audioMetrics}
+              colormap={colormap}
+              showSpectrogram={true}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

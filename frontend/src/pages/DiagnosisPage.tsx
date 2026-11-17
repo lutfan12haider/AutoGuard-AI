@@ -75,7 +75,11 @@ export function DiagnosisPage({
   ) => {
     const lower = candidate.name.toLowerCase();
     if (!lower.endsWith(".wav") && !lower.endsWith(".mp3")) {
-      setError("Please choose a WAV or MP3 audio file.");
+      setError("Unsupported audio format. Only .wav and .mp3 engine recordings are supported.");
+      return;
+    }
+    if (candidate.size === 0) {
+      setError("Uploaded audio file is empty. Please choose a valid WAV or MP3 recording.");
       return;
     }
     if (candidate.size > 25 * 1024 * 1024) {
@@ -92,13 +96,13 @@ export function DiagnosisPage({
       const m = await decodeAndAnalyzeAudio(candidate);
       setMetrics(m);
       if (m.tooShort) {
-        setError("Recording is too short. Please use at least 1 second of engine sound.");
+        setError("Unsupported audio: recording is too short. Please provide at least 1 second of engine sound.");
       } else if (m.isSilent) {
-        setError("No sound detected in this file. Try recording closer to the engine.");
+        setError("Unsupported audio: no engine sound detected (silent clip). Try recording closer to the engine.");
       }
     } catch {
       setMetrics(null);
-      setError("Could not preview audio in browser, but you can still run the check.");
+      setError("Audio preview could not be decoded in browser, but you can still submit for server validation.");
     } finally {
       setDecoding(false);
     }
@@ -124,7 +128,7 @@ export function DiagnosisPage({
     }
   };
 
-  // Pick a clean curated set of 6 sample clips (2 per category) so the list stays simple
+  // Pick a clean curated set of 6 sample clips (2 per category)
   const curatedSamples = [
     ...samples.filter((s) => s.expected_class === "healthy").slice(0, 2),
     ...samples.filter((s) => s.expected_class === "engine_knock").slice(0, 2),
@@ -138,11 +142,11 @@ export function DiagnosisPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#0F172A] leading-tight">
+          <h2 className="text-[28px] font-semibold text-[#F8FAFC] leading-tight">
             Check your engine
           </h2>
-          <p className="text-[14px] text-[#64748B] mt-1">
-            Upload or record a short clip of your engine running to check for knock or misfire.
+          <p className="text-[14px] text-[#94A3B8] mt-1">
+            Upload or record an engine clip to classify Healthy, Misfire, or Engine Knocking and generate repair guidance.
           </p>
         </div>
 
@@ -233,8 +237,8 @@ export function DiagnosisPage({
 
                   {tab === "samples" && (
                     <div className="space-y-4">
-                      <p className="text-[13px] text-[#64748B]">
-                        Try a real car engine recording to see how the check works.
+                      <p className="text-[13px] text-[#94A3B8]">
+                        Select a real engine recording from the dataset to test classification and repair recommendations.
                       </p>
 
                       {curatedSamples.length === 0 ? (
@@ -251,17 +255,17 @@ export function DiagnosisPage({
                               type="button"
                               disabled={loadingSampleId === s.id}
                               onClick={() => handleSelectSample(s)}
-                              className="rounded-[10px] border border-[#E7E5E4] hover:border-[#4F46E5]/60 bg-[#FAFAF9] hover:bg-[#EEF2FF]/35 p-4 text-left transition-all flex items-center justify-between gap-3"
+                              className="rounded-[10px] border border-[#1E293B] hover:border-[#38BDF8]/60 bg-[#090D16] hover:bg-[#0EA5E9]/10 p-4 text-left transition-all flex items-center justify-between gap-3"
                             >
                               <div className="min-w-0">
-                                <div className="text-[14px] font-semibold text-[#0F172A]">
+                                <div className="text-[14px] font-semibold text-[#F8FAFC]">
                                   {predictionToLabel(s.expected_class)} #{(idx % 2) + 1}
                                 </div>
-                                <div className="text-[12px] text-[#64748B] truncate mt-0.5">
+                                <div className="text-[12px] text-[#94A3B8] truncate mt-0.5">
                                   {s.filename}
                                 </div>
                               </div>
-                              <span className="shrink-0 h-8 w-8 rounded-full bg-white border border-[#E7E5E4] flex items-center justify-center text-[#4F46E5]">
+                              <span className="shrink-0 h-8 w-8 rounded-full bg-[#111827] border border-[#1E293B] flex items-center justify-center text-[#38BDF8]">
                                 <Play size={13} strokeWidth={1.5} className="ml-0.5" />
                               </span>
                             </button>
@@ -279,16 +283,16 @@ export function DiagnosisPage({
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   className="space-y-4"
                 >
-                  <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-[#E7E5E4]">
+                  <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-[#1E293B]">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 rounded-[8px] bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 rounded-[8px] bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] flex items-center justify-center shrink-0">
                         <FileAudio size={18} strokeWidth={1.5} />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-[14px] font-semibold text-[#0F172A] truncate">
+                        <div className="text-[14px] font-semibold text-[#F8FAFC] truncate">
                           {file.name}
                         </div>
-                        <div className="text-[12px] text-[#64748B] font-mono-data">
+                        <div className="text-[12px] text-[#94A3B8] font-mono-data">
                           {(file.size / 1024).toFixed(0)} KB
                         </div>
                       </div>
@@ -310,13 +314,13 @@ export function DiagnosisPage({
             </AnimatePresence>
 
             {error && (
-              <div className="rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#DC2626]">
+              <div className="rounded-[8px] border border-[#EF4444]/40 bg-[#EF4444]/10 px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#F87171]">
                 <AlertCircle size={16} strokeWidth={1.5} className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <div className="flex items-center justify-end pt-2 border-t border-[#E7E5E4]">
+            <div className="flex items-center justify-end pt-2 border-t border-[#1E293B]">
               <Button
                 type="button"
                 size="lg"
@@ -330,13 +334,13 @@ export function DiagnosisPage({
           </Card>
         </div>
 
-        {/* Calm Recording Tips */}
+        {/* Recording Tips */}
         <aside className="xl:col-span-4">
           <Card className="p-6 space-y-5">
             <div>
-              <h3 className="text-[16px] font-semibold text-[#0F172A]">Tips for a clear recording</h3>
-              <p className="text-[13px] text-[#64748B] mt-1">
-                Follow these simple steps for the most accurate result.
+              <h3 className="text-[16px] font-semibold text-[#F8FAFC]">Tips for a clear recording</h3>
+              <p className="text-[13px] text-[#94A3B8] mt-1">
+                Follow these steps for high-confidence acoustic screening.
               </p>
             </div>
 
@@ -344,28 +348,28 @@ export function DiagnosisPage({
               {[
                 {
                   title: "Warm up your car",
-                  desc: "Let the engine run for a few minutes before recording.",
+                  desc: "Let the engine reach normal idle temperature before recording.",
                 },
                 {
                   title: "Hold 1–2 feet away",
-                  desc: "Point your phone near the open hood, away from wind or traffic.",
+                  desc: "Position your microphone near the open hood, away from wind or traffic.",
                 },
                 {
                   title: "Record 10–15 seconds",
-                  desc: "Keep the engine idling steadily while you record.",
+                  desc: "Keep the engine idling steadily while you capture audio.",
                 },
                 {
-                  title: "Keep your hand steady",
-                  desc: "Don't rest your phone directly on vibrating engine parts.",
+                  title: "Avoid contact noise",
+                  desc: "Do not rest your phone or microphone directly on vibrating parts.",
                 },
               ].map((tip, idx) => (
                 <li key={tip.title} className="flex items-start gap-3">
-                  <span className="h-6 w-6 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="h-6 w-6 rounded-full bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
                   <div>
-                    <div className="text-[14px] font-medium text-[#0F172A]">{tip.title}</div>
-                    <p className="text-[13px] text-[#64748B] mt-0.5">{tip.desc}</p>
+                    <div className="text-[14px] font-medium text-[#F8FAFC]">{tip.title}</div>
+                    <p className="text-[13px] text-[#94A3B8] mt-0.5">{tip.desc}</p>
                   </div>
                 </li>
               ))}

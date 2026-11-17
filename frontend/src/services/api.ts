@@ -1,6 +1,7 @@
 import type {
   AnalysisResult,
   AppSettings,
+  ConfidenceTier,
   CoreCondition,
   DiagnoseResult,
   DiagnosticRecord,
@@ -9,6 +10,7 @@ import type {
   HistoryResponse,
   InferenceMode,
   ModelTelemetryResponse,
+  RepairRecommendationPayload,
   SampleAudioItem,
   StatsResponse,
   UnifiedDiagnosticReport,
@@ -93,10 +95,206 @@ export async function consensusDiagnose(file: File, save = true): Promise<Analys
   return handleResponse<AnalysisResult>(res);
 }
 
+const CLIENT_REPAIR_DATA: Record<
+  CoreCondition,
+  {
+    display_label: string;
+    diagnosis_overview: string[];
+    possible_causes: string[];
+    recommended_inspections: string[];
+    possible_repairs: string[];
+    safety_warning: string;
+    maintenance_advice: string[];
+  }
+> = {
+  healthy: {
+    display_label: "Healthy",
+    diagnosis_overview: [
+      "Engine sound appears consistent with the healthy class.",
+      "No supported fault pattern was identified.",
+      "Continue routine vehicle maintenance.",
+      "Monitor unusual sounds if they develop.",
+    ],
+    possible_causes: [],
+    recommended_inspections: [
+      "Continue routine scheduled inspections according to the vehicle service manual.",
+      "Monitor engine sound and dashboard indicators if new symptoms develop.",
+    ],
+    possible_repairs: [],
+    safety_warning:
+      "Audio analysis covers only acoustic patterns for supported categories (healthy, misfire, engine_knock) and does not guarantee that the entire vehicle is 100% free of mechanical or electronic issues.",
+    maintenance_advice: [
+      "Engine sound appears consistent with the healthy class.",
+      "No supported fault pattern was identified.",
+      "Continue routine vehicle maintenance.",
+      "Monitor unusual sounds if they develop.",
+    ],
+  },
+  misfire: {
+    display_label: "Misfire",
+    diagnosis_overview: [
+      "Acoustic pattern is consistent with the Engine Misfire classification category.",
+      "Audio screening indicates irregular combustion cadence; physical inspection is required to confirm the underlying cause.",
+    ],
+    possible_causes: [
+      "Worn or faulty spark plugs.",
+      "Defective ignition coil.",
+      "Fuel injector problems.",
+      "Fuel delivery issues.",
+    ],
+    recommended_inspections: [
+      "Inspect spark plugs.",
+      "Check ignition coils.",
+      "Inspect fuel injectors.",
+      "Check for engine warning lights and diagnostic trouble codes.",
+    ],
+    possible_repairs: [
+      "Clean or replace spark plugs if necessary.",
+      "Replace a faulty ignition coil after confirmation.",
+      "Clean or repair fuel injectors if testing confirms a problem.",
+      "Repair fuel delivery issues if identified.",
+    ],
+    safety_warning:
+      "If the engine is shaking severely, losing power, or the check-engine light is flashing, stop driving and arrange professional inspection.",
+    maintenance_advice: [
+      "Follow manufacturer spark plug and ignition service intervals.",
+      "Use clean, manufacturer-recommended fuel and replace fuel filters on schedule.",
+      "Address check-engine warning lights promptly before catalytic converter damage occurs.",
+    ],
+  },
+  engine_knock: {
+    display_label: "Engine Knocking",
+    diagnosis_overview: [
+      "Acoustic pattern is consistent with the Engine Knocking classification category.",
+      "Audio screening indicates metallic knocking or pinging tendencies; a professional mechanical check is needed to verify the source.",
+    ],
+    possible_causes: [
+      "Low engine oil level.",
+      "Incorrect fuel quality or octane rating.",
+      "Incorrect ignition timing.",
+      "Internal engine component wear.",
+      "Combustion-related problems.",
+    ],
+    recommended_inspections: [
+      "Check engine oil level and condition.",
+      "Verify fuel quality and manufacturer's requirements.",
+      "Inspect ignition and combustion systems.",
+      "Have internal engine components inspected if knocking persists.",
+    ],
+    possible_repairs: [
+      "Top up or replace engine oil using the correct specification if required.",
+      "Address fuel quality issues.",
+      "Correct ignition-related problems if confirmed.",
+      "Repair or replace damaged internal components if diagnosed by a mechanic.",
+    ],
+    safety_warning:
+      "Loud or persistent knocking can indicate serious engine damage. Stop driving and arrange professional inspection.",
+    maintenance_advice: [
+      "Check engine oil level regularly and adhere to recommended oil change intervals.",
+      "Always refuel with the octane rating specified in the owner's manual.",
+      "Avoid heavy engine load or high RPM operation until knocking sounds are inspected.",
+    ],
+  },
+};
+
+export function buildClientRepairRecommendations(
+  predictedClass: string,
+  confidence: number,
+  uncertain = false,
+  uncertainReason?: string | null,
+  disagreeStd = 0
+): RepairRecommendationPayload {
+  const conf = Math.max(0, Math.min(1, confidence || 0));
+  const disclaimer =
+    "ML acoustic confidence is a screening indicator and is never proof of a specific mechanical fault. Always confirm diagnoses with a qualified mechanic.";
+
+  const validClass: CoreCondition | null =
+    predictedClass === "healthy" || predictedClass === "misfire" || predictedClass === "engine_knock"
+      ? predictedClass
+      : null;
+
+  if (!validClass) {
+    return {
+      predicted_class: "unsupported",
+      display_label: "Unsupported Audio",
+      confidence: conf,
+      confidence_tier: "unsupported",
+      uncertainty_warning:
+        "Unsupported audio or unrecognized classification category. AutoGuard AI exclusively supports healthy, misfire, and engine_knock engine recordings.",
+      diagnosis_overview: [
+        "The uploaded audio does not match a supported classification category.",
+        "AutoGuard AI only evaluates healthy, misfire, and engine_knock patterns.",
+      ],
+      possible_causes: [],
+      recommended_inspections: [
+        "Verify that the recording captures a running vehicle engine in WAV or MP3 format.",
+        "Re-record 10–15 seconds of steady engine idle close to the hood.",
+      ],
+      possible_repairs: [],
+      safety_warning:
+        "If your vehicle exhibits warning lights, rough running, or unusual noises, arrange a professional mechanical inspection.",
+      maintenance_advice: [
+        "Continue routine vehicle maintenance according to manufacturer specifications.",
+      ],
+      disclaimer,
+    };
+  }
+
+  const base = CLIENT_REPAIR_DATA[validClass];
+  if (conf < 0.55 || disagreeStd > 0.2) {
+    return {
+      predicted_class: validClass,
+      display_label: "Inconclusive / Low Confidence",
+      confidence: conf,
+      confidence_tier: "low",
+      uncertainty_warning: `Low confidence reading (${
+        uncertainReason || `${(conf * 100).toFixed(1)}% is below the 55% minimum threshold`
+      }). Because the acoustic signal is ambiguous or inconsistent across time windows, a definitive fault-specific diagnosis cannot be provided from this recording.`,
+      diagnosis_overview: [
+        "Audio confidence is too low to provide a definitive fault-specific diagnosis.",
+        "Background noise, microphone distance, or fluctuating engine speed may have obscured the sound pattern.",
+        "Re-record a clean 10–15 second clip at steady engine idle, or have a technician inspect the vehicle directly.",
+      ],
+      possible_causes: [],
+      recommended_inspections: [
+        "Re-record engine audio 1–2 feet from the open hood in a quiet setting.",
+        "Check the dashboard for any active check-engine or oil warning lights.",
+        "Arrange a professional inspection if you notice roughness, power loss, or metallic noise.",
+      ],
+      possible_repairs: [],
+      safety_warning: base.safety_warning,
+      maintenance_advice: [
+        "Continue routine vehicle maintenance.",
+        "Monitor unusual sounds if they develop.",
+      ],
+      disclaimer,
+    };
+  }
+
+  const tier: ConfidenceTier = conf < 0.75 || uncertain ? "moderate" : "high";
+  return {
+    predicted_class: validClass,
+    display_label: base.display_label,
+    confidence: conf,
+    confidence_tier: tier,
+    uncertainty_warning:
+      tier === "moderate"
+        ? `Moderate confidence (${(conf * 100).toFixed(1)}% — below the 75% high-confidence threshold). The recommendations below are preliminary possibilities based on acoustic similarity and must be verified through physical inspection before any repair.`
+        : null,
+    diagnosis_overview: [...base.diagnosis_overview],
+    possible_causes: [...base.possible_causes],
+    recommended_inspections: [...base.recommended_inspections],
+    possible_repairs: [...base.possible_repairs],
+    safety_warning: base.safety_warning,
+    maintenance_advice: [...base.maintenance_advice],
+    disclaimer,
+  };
+}
+
 /**
  * Execute diagnosis using the unified consensus endpoint (or CNN/SVM directly),
- * always returning a single specific engine condition (healthy, engine_knock, or misfire)
- * along with its confidence score.
+ * returning the predicted engine condition, confidence score, and structured
+ * Repair Recommendation System payload.
  */
 export async function runUnifiedDiagnosis(
   file: File,
@@ -109,19 +307,28 @@ export async function runUnifiedDiagnosis(
   if (mode === "cnn") {
     const cnn = await diagnoseWithCNN(file, settings.autoSaveCnn);
     const scores = cnn.confidence_scores;
-    const topConf = Math.max(scores.engine_knock ?? 0, scores.healthy ?? 0, scores.misfire ?? 0);
+    const topConf =
+      cnn.confidence ?? Math.max(scores.engine_knock ?? 0, scores.healthy ?? 0, scores.misfire ?? 0);
+    const fallback = buildClientRepairRecommendations(
+      cnn.prediction,
+      topConf,
+      Boolean(cnn.uncertain),
+      cnn.uncertain_reason,
+      0
+    );
     return {
       scan_id: cnn.scan_id ?? -1,
       filename: file.name,
       mode: "cnn",
       prediction: cnn.prediction,
+      predicted_class: cnn.predicted_class ?? fallback.predicted_class,
       confidence: topConf,
       class_scores: scores,
       duration_sec: cnn.duration_sec,
       inference_ms: cnn.inference_ms,
       created_at: cnn.created_at || new Date().toISOString(),
-      uncertain: false,
-      uncertain_reason: null,
+      uncertain: Boolean(cnn.uncertain),
+      uncertain_reason: cnn.uncertain_reason ?? null,
       model_prediction: cnn.prediction,
       disagree_std: 0,
       window_count: 1,
@@ -130,6 +337,21 @@ export async function runUnifiedDiagnosis(
       svm_result: null,
       source,
       expected_class: expectedClass,
+      confidence_tier: cnn.confidence_tier ?? fallback.confidence_tier,
+      uncertainty_warning: cnn.uncertainty_warning ?? fallback.uncertainty_warning,
+      diagnosis_overview: cnn.diagnosis_overview?.length
+        ? cnn.diagnosis_overview
+        : fallback.diagnosis_overview,
+      possible_causes: cnn.possible_causes ?? fallback.possible_causes,
+      recommended_inspections: cnn.recommended_inspections?.length
+        ? cnn.recommended_inspections
+        : fallback.recommended_inspections,
+      possible_repairs: cnn.possible_repairs ?? fallback.possible_repairs,
+      safety_warning: cnn.safety_warning ?? fallback.safety_warning,
+      maintenance_advice: cnn.maintenance_advice?.length
+        ? cnn.maintenance_advice
+        : fallback.maintenance_advice,
+      disclaimer: cnn.disclaimer ?? fallback.disclaimer,
     };
   }
 
@@ -141,18 +363,26 @@ export async function runUnifiedDiagnosis(
           ((Object.entries(svm.class_scores).sort((a, b) => b[1] - a[1])[0]?.[0] as CoreCondition) ??
             "healthy")
         : svm.prediction;
+    const fallback = buildClientRepairRecommendations(
+      specificPred,
+      svm.confidence,
+      svm.uncertain,
+      svm.uncertain_reason,
+      svm.disagree_std
+    );
     return {
       scan_id: svm.scan_id,
       filename: svm.filename,
       mode: "svm",
       prediction: specificPred,
+      predicted_class: svm.predicted_class ?? fallback.predicted_class,
       confidence: svm.confidence,
       class_scores: svm.class_scores,
       duration_sec: svm.duration_sec,
       inference_ms: svm.inference_ms,
       created_at: svm.created_at || new Date().toISOString(),
-      uncertain: false,
-      uncertain_reason: null,
+      uncertain: svm.uncertain,
+      uncertain_reason: svm.uncertain_reason ?? null,
       model_prediction: specificPred,
       disagree_std: svm.disagree_std,
       window_count: svm.window_count,
@@ -161,6 +391,21 @@ export async function runUnifiedDiagnosis(
       svm_result: svm,
       source,
       expected_class: expectedClass,
+      confidence_tier: svm.confidence_tier ?? fallback.confidence_tier,
+      uncertainty_warning: svm.uncertainty_warning ?? fallback.uncertainty_warning,
+      diagnosis_overview: svm.diagnosis_overview?.length
+        ? svm.diagnosis_overview
+        : fallback.diagnosis_overview,
+      possible_causes: svm.possible_causes ?? fallback.possible_causes,
+      recommended_inspections: svm.recommended_inspections?.length
+        ? svm.recommended_inspections
+        : fallback.recommended_inspections,
+      possible_repairs: svm.possible_repairs ?? fallback.possible_repairs,
+      safety_warning: svm.safety_warning ?? fallback.safety_warning,
+      maintenance_advice: svm.maintenance_advice?.length
+        ? svm.maintenance_advice
+        : fallback.maintenance_advice,
+      disclaimer: svm.disclaimer ?? fallback.disclaimer,
     };
   }
 
@@ -172,19 +417,27 @@ export async function runUnifiedDiagnosis(
         ((Object.entries(consensus.class_scores).sort((a, b) => b[1] - a[1])[0]?.[0] as CoreCondition) ??
           "healthy")
       : consensus.prediction;
+  const fallback = buildClientRepairRecommendations(
+    specificPred,
+    consensus.confidence,
+    consensus.uncertain,
+    consensus.uncertain_reason,
+    consensus.disagree_std
+  );
 
   return {
     scan_id: consensus.scan_id,
     filename: consensus.filename,
     mode: "dual",
     prediction: specificPred,
+    predicted_class: consensus.predicted_class ?? fallback.predicted_class,
     confidence: consensus.confidence,
     class_scores: consensus.class_scores,
     duration_sec: consensus.duration_sec,
     inference_ms: consensus.inference_ms,
     created_at: consensus.created_at || new Date().toISOString(),
-    uncertain: false,
-    uncertain_reason: null,
+    uncertain: consensus.uncertain,
+    uncertain_reason: consensus.uncertain_reason ?? null,
     model_prediction: specificPred,
     disagree_std: consensus.disagree_std,
     window_count: consensus.window_count,
@@ -193,6 +446,21 @@ export async function runUnifiedDiagnosis(
     svm_result: null,
     source,
     expected_class: expectedClass,
+    confidence_tier: consensus.confidence_tier ?? fallback.confidence_tier,
+    uncertainty_warning: consensus.uncertainty_warning ?? fallback.uncertainty_warning,
+    diagnosis_overview: consensus.diagnosis_overview?.length
+      ? consensus.diagnosis_overview
+      : fallback.diagnosis_overview,
+    possible_causes: consensus.possible_causes ?? fallback.possible_causes,
+    recommended_inspections: consensus.recommended_inspections?.length
+      ? consensus.recommended_inspections
+      : fallback.recommended_inspections,
+    possible_repairs: consensus.possible_repairs ?? fallback.possible_repairs,
+    safety_warning: consensus.safety_warning ?? fallback.safety_warning,
+    maintenance_advice: consensus.maintenance_advice?.length
+      ? consensus.maintenance_advice
+      : fallback.maintenance_advice,
+    disclaimer: consensus.disclaimer ?? fallback.disclaimer,
   };
 }
 
@@ -244,11 +512,11 @@ export function getSampleAudioUrl(path: string): string {
 export function predictionToLabel(prediction: string): string {
   switch (prediction) {
     case "engine_knock":
-      return "Engine Knock";
+      return "Engine Knocking";
     case "healthy":
-      return "Healthy Engine";
+      return "Healthy";
     case "misfire":
-      return "Engine Misfire";
+      return "Misfire";
     case "uncertain":
       return "Unclear Audio";
     default:

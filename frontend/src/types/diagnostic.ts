@@ -1,5 +1,6 @@
 export type EngineCondition = "healthy" | "engine_knock" | "misfire" | "uncertain";
 export type CoreCondition = "healthy" | "engine_knock" | "misfire";
+export type ConfidenceTier = "high" | "moderate" | "low" | "unsupported";
 export type InferenceMode = "dual" | "cnn" | "svm";
 export type SpectrogramColormap = "thermal" | "cyan" | "viridis";
 export type AppPage = "dashboard" | "diagnosis" | "results" | "history" | "telemetry";
@@ -9,6 +10,21 @@ export interface ClassScores {
   healthy: number;
   misfire: number;
   [key: string]: number;
+}
+
+export interface RepairRecommendationPayload {
+  predicted_class: CoreCondition | "unsupported";
+  display_label: string;
+  confidence: number;
+  confidence_tier: ConfidenceTier;
+  uncertainty_warning?: string | null;
+  diagnosis_overview: string[];
+  possible_causes: string[];
+  recommended_inspections: string[];
+  possible_repairs: string[];
+  safety_warning?: string | null;
+  maintenance_advice: string[];
+  disclaimer?: string | null;
 }
 
 export interface WindowResult {
@@ -26,6 +42,7 @@ export interface AnalysisResult {
   scan_id: number;
   filename: string;
   prediction: EngineCondition;
+  predicted_class?: CoreCondition | "unsupported";
   confidence: number;
   class_scores: ClassScores;
   duration_sec: number;
@@ -37,16 +54,40 @@ export interface AnalysisResult {
   uncertain_reason?: string | null;
   model_prediction?: CoreCondition | null;
   disagree_std: number;
+  confidence_tier?: ConfidenceTier;
+  uncertainty_warning?: string | null;
+  diagnosis_overview?: string[];
+  possible_causes?: string[];
+  recommended_inspections?: string[];
+  possible_repairs?: string[];
+  safety_warning?: string | null;
+  maintenance_advice?: string[];
+  disclaimer?: string | null;
+  repair_recommendations?: RepairRecommendationPayload | null;
 }
 
 export interface DiagnoseResult {
   prediction: CoreCondition;
+  predicted_class?: CoreCondition | "unsupported";
+  confidence?: number;
   confidence_scores: ClassScores;
   duration_sec: number;
   inference_ms: number;
   model: string;
   scan_id?: number | null;
   created_at?: string | null;
+  uncertain?: boolean;
+  uncertain_reason?: string | null;
+  confidence_tier?: ConfidenceTier;
+  uncertainty_warning?: string | null;
+  diagnosis_overview?: string[];
+  possible_causes?: string[];
+  recommended_inspections?: string[];
+  possible_repairs?: string[];
+  safety_warning?: string | null;
+  maintenance_advice?: string[];
+  disclaimer?: string | null;
+  repair_recommendations?: RepairRecommendationPayload | null;
 }
 
 export interface UnifiedDiagnosticReport {
@@ -54,6 +95,7 @@ export interface UnifiedDiagnosticReport {
   filename: string;
   mode: InferenceMode;
   prediction: EngineCondition;
+  predicted_class: CoreCondition | "unsupported";
   confidence: number;
   class_scores: ClassScores;
   duration_sec: number;
@@ -70,12 +112,22 @@ export interface UnifiedDiagnosticReport {
   svm_result?: AnalysisResult | null;
   source?: "upload" | "mic" | "sample" | "history";
   expected_class?: string;
+  confidence_tier: ConfidenceTier;
+  uncertainty_warning?: string | null;
+  diagnosis_overview: string[];
+  possible_causes: string[];
+  recommended_inspections: string[];
+  possible_repairs: string[];
+  safety_warning?: string | null;
+  maintenance_advice: string[];
+  disclaimer?: string | null;
 }
 
 export interface DiagnosticRecord {
   id: number;
   filename: string;
   prediction: EngineCondition;
+  predicted_class?: CoreCondition | "unsupported";
   confidence: number;
   knock_score: number;
   healthy_score: number;
@@ -83,6 +135,15 @@ export interface DiagnosticRecord {
   duration_sec: number;
   inference_ms: number;
   created_at: string;
+  confidence_tier?: ConfidenceTier;
+  uncertainty_warning?: string | null;
+  diagnosis_overview?: string[];
+  possible_causes?: string[];
+  recommended_inspections?: string[];
+  possible_repairs?: string[];
+  safety_warning?: string | null;
+  maintenance_advice?: string[];
+  disclaimer?: string | null;
 }
 
 export interface HistoryResponse {

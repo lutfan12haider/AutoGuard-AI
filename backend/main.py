@@ -32,8 +32,22 @@ sys.path.insert(0, _ROOT)
 
 from backend.database import init_db, insert_diagnostic, get_all_diagnostics, get_diagnostic_by_id, delete_diagnostic, get_stats
 from backend.model import load_model, warmup_model, is_model_loaded, get_model_info, predict_audio
-from backend.schemas import AnalysisResult, DiagnosticRecord, HistoryResponse, StatsResponse, HealthResponse, DiagnoseResult
+from backend.schemas import (
+    AnalysisResult,
+    DiagnosticRecord,
+    HistoryResponse,
+    StatsResponse,
+    HealthResponse,
+    DiagnoseResult,
+    RepairRecommendationPayload,
+)
 from backend.cnn_model import load_cnn, predict_with_cnn, is_cnn_loaded, get_cnn_info
+from backend.repair_recommendations import (
+    REPAIR_RECOMMENDATIONS_DATA,
+    SUPPORTED_CLASSES,
+    get_repair_recommendations,
+    load_confidence_thresholds,
+)
 
 # ── Supported file types ───────────────────────────────────────────────────────
 ALLOWED_CONTENT_TYPES = {
@@ -203,21 +217,64 @@ async def analyze_audio(
     record = get_diagnostic_by_id(scan_id) if scan_id > 0 else None
     created_at = record["created_at"] if record else ""
 
-    return AnalysisResult(
-        scan_id          = scan_id,
-        filename         = file.filename,
-        prediction       = result["prediction"],
+    recs = get_repair_recommendations(
+        predicted_class  = result["prediction"],
         confidence       = result["confidence"],
-        class_scores     = result["class_scores"],
-        duration_sec     = result["duration_sec"],
-        inference_ms     = result["inference_ms"],
-        created_at       = created_at,
-        window_count     = result.get("window_count", 1),
-        windows          = result.get("windows", []),
+        model_prediction = result.get("model_prediction"),
         uncertain        = result.get("uncertain", False),
         uncertain_reason = result.get("uncertain_reason"),
-        model_prediction = result.get("model_prediction"),
         disagree_std     = result.get("disagree_std", 0.0),
+    )
+
+    return AnalysisResult(
+        scan_id                 = scan_id,
+        filename                = file.filename,
+        prediction              = result["prediction"],
+        predicted_class         = recs["predicted_class"],
+        confidence              = result["confidence"],
+        class_scores            = result["class_scores"],
+        duration_sec            = result["duration_sec"],
+        inference_ms            = result["inference_ms"],
+        created_at              = created_at,
+        window_count            = result.get("window_count", 1),
+        windows                 = result.get("windows", []),
+        uncertain               = result.get("uncertain", False),
+        uncertain_reason        = result.get("uncertain_reason"),
+        model_prediction        = result.get("model_prediction"),
+        disagree_std            = result.get("disagree_std", 0.0),
+        confidence_tier         = recs["confidence_tier"],
+        uncertainty_warning     = recs["uncertainty_warning"],
+        diagnosis_overview      = recs["diagnosis_overview"],
+        possible_causes         = recs["possible_causes"],
+        recommended_inspections = recs["recommended_inspections"],
+        possible_repairs        = recs["possible_repairs"],
+        safety_warning          = recs["safety_warning"],
+        maintenance_advice      = recs["maintenance_advice"],
+        disclaimer              = recs["disclaimer"],
+        repair_recommendations  = RepairRecommendationPayload(**recs),
+    )
+
+
+def _enrich_diagnostic_record(r: dict) -> DiagnosticRecord:
+    """Attach computed Repair Recommendation fields to a historical diagnostic row."""
+    recs = get_repair_recommendations(
+        predicted_class  = r["prediction"],
+        confidence       = float(r.get("confidence", 0.0)),
+        model_prediction = r["prediction"],
+        uncertain        = float(r.get("confidence", 0.0)) < load_confidence_thresholds()["high_confidence_threshold"],
+    )
+    return DiagnosticRecord(
+        **r,
+        predicted_class         = recs["predicted_class"],
+        confidence_tier         = recs["confidence_tier"],
+        uncertainty_warning     = recs["uncertainty_warning"],
+        diagnosis_overview      = recs["diagnosis_overview"],
+        possible_causes         = recs["possible_causes"],
+        recommended_inspections = recs["recommended_inspections"],
+        possible_repairs        = recs["possible_repairs"],
+        safety_warning          = recs["safety_warning"],
+        maintenance_advice      = recs["maintenance_advice"],
+        disclaimer              = recs["disclaimer"],
     )
 
 
@@ -232,7 +289,7 @@ async def get_history(
     Supports pagination via `limit` and `offset` query parameters.
     """
     records_raw = get_all_diagnostics(limit=limit, offset=offset)
-    records = [DiagnosticRecord(**r) for r in records_raw]
+    records = [_enrich_diagnostic_record(r) for r in records_raw]
 
     # Total count for pagination
     all_records = get_all_diagnostics(limit=100000, offset=0)
@@ -259,7 +316,7 @@ async def get_scan(scan_id: int):
             status_code=404,
             detail=f"Scan #{scan_id} not found.",
         )
-    return DiagnosticRecord(**record)
+    return _enrich_diagnostic_record(record)
 
 
 @app.delete("/api/history/{scan_id}", tags=["History"])
@@ -321,7 +378,23 @@ async def diagnose_audio(
         raise HTTPException(status_code=500, detail=f"CNN inference error: {e}")
 
     scores = result["confidence_scores"]
-    top_conf = float(max(scores.values())) if scores else 0.0
+    top_conf = round(float(max(scores.values())), 4) if scores else 0.0
+    thresholds = load_confidence_thresholds()
+    cnn_uncertain = top_conf < thresholds["high_confidence_threshold"]
+    cnn_uncertain_reason = (
+        f"low confidence ({top_conf:.2f} < {thresholds['high_confidence_threshold']})"
+        if cnn_uncertain
+        else None
+    )
+    recs = get_repair_recommendations(
+        predicted_class  = result["prediction"],
+        confidence       = top_conf,
+        model_prediction = result["prediction"],
+        uncertain        = cnn_uncertain,
+        uncertain_reason = cnn_uncertain_reason,
+        disagree_std     = 0.0,
+    )
+
     scan_id = None
     created_at = None
     if save:
@@ -340,12 +413,26 @@ async def diagnose_audio(
             print(f"[DB] Insert failed for /api/diagnose: {e}")
 
     return DiagnoseResult(
-        prediction        = result["prediction"],
-        confidence_scores = result["confidence_scores"],
-        duration_sec      = result["duration_sec"],
-        inference_ms      = result["inference_ms"],
-        scan_id           = scan_id,
-        created_at        = created_at,
+        prediction              = result["prediction"],
+        predicted_class         = recs["predicted_class"],
+        confidence              = top_conf,
+        confidence_scores       = result["confidence_scores"],
+        duration_sec            = result["duration_sec"],
+        inference_ms            = result["inference_ms"],
+        scan_id                 = scan_id,
+        created_at              = created_at,
+        uncertain               = cnn_uncertain,
+        uncertain_reason        = cnn_uncertain_reason,
+        confidence_tier         = recs["confidence_tier"],
+        uncertainty_warning     = recs["uncertainty_warning"],
+        diagnosis_overview      = recs["diagnosis_overview"],
+        possible_causes         = recs["possible_causes"],
+        recommended_inspections = recs["recommended_inspections"],
+        possible_repairs        = recs["possible_repairs"],
+        safety_warning          = recs["safety_warning"],
+        maintenance_advice      = recs["maintenance_advice"],
+        disclaimer              = recs["disclaimer"],
+        repair_recommendations  = RepairRecommendationPayload(**recs),
     )
 
 
@@ -427,6 +514,27 @@ async def consensus_diagnose(
     pred_label = max(classes, key=lambda c: fused[c])
     confidence = round(float(fused[pred_label]), 4)
 
+    thresholds = load_confidence_thresholds()
+    high_t = thresholds["high_confidence_threshold"]
+    disagree_t = thresholds["disagree_threshold"]
+
+    reasons = []
+    if confidence < high_t:
+        reasons.append(f"low confidence ({confidence:.2f} < {high_t})")
+    if disagree_std > disagree_t:
+        reasons.append(f"windows disagree (std={disagree_std:.2f} > {disagree_t})")
+    is_uncertain = len(reasons) > 0
+    uncertain_reason = "; ".join(reasons) if is_uncertain else None
+
+    recs = get_repair_recommendations(
+        predicted_class  = pred_label,
+        confidence       = confidence,
+        model_prediction = pred_label,
+        uncertain        = is_uncertain,
+        uncertain_reason = uncertain_reason,
+        disagree_std     = disagree_std,
+    )
+
     scan_id = -1
     created_at = ""
     if save:
@@ -445,21 +553,42 @@ async def consensus_diagnose(
             print(f"[DB] Insert failed for /api/consensus: {e}")
 
     return AnalysisResult(
-        scan_id          = scan_id,
-        filename         = file.filename,
-        prediction       = pred_label,
-        confidence       = confidence,
-        class_scores     = fused,
-        duration_sec     = duration_sec,
-        inference_ms     = inference_ms,
-        created_at       = created_at,
-        window_count     = window_count,
-        windows          = windows,
-        uncertain        = False,
-        uncertain_reason = None,
-        model_prediction = pred_label,
-        disagree_std     = disagree_std,
+        scan_id                 = scan_id,
+        filename                = file.filename,
+        prediction              = pred_label,
+        predicted_class         = recs["predicted_class"],
+        confidence              = confidence,
+        class_scores            = fused,
+        duration_sec            = duration_sec,
+        inference_ms            = inference_ms,
+        created_at              = created_at,
+        window_count            = window_count,
+        windows                 = windows,
+        uncertain               = is_uncertain,
+        uncertain_reason        = uncertain_reason,
+        model_prediction        = pred_label,
+        disagree_std            = disagree_std,
+        confidence_tier         = recs["confidence_tier"],
+        uncertainty_warning     = recs["uncertainty_warning"],
+        diagnosis_overview      = recs["diagnosis_overview"],
+        possible_causes         = recs["possible_causes"],
+        recommended_inspections = recs["recommended_inspections"],
+        possible_repairs        = recs["possible_repairs"],
+        safety_warning          = recs["safety_warning"],
+        maintenance_advice      = recs["maintenance_advice"],
+        disclaimer              = recs["disclaimer"],
+        repair_recommendations  = RepairRecommendationPayload(**recs),
     )
+
+
+@app.get("/api/recommendations", tags=["Diagnosis"])
+async def list_repair_recommendations():
+    """Return the structured Repair Recommendation definitions for the three supported classes."""
+    return {
+        "supported_classes": list(SUPPORTED_CLASSES),
+        "thresholds": load_confidence_thresholds(),
+        "recommendations": REPAIR_RECOMMENDATIONS_DATA,
+    }
 
 
 def _read_json_safe(rel_path: str):

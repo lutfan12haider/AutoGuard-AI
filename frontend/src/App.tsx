@@ -23,6 +23,7 @@ import type {
   UnifiedDiagnosticReport,
 } from "./types/diagnostic";
 import {
+  buildClientRepairRecommendations,
   checkHealth,
   deleteScan,
   fetchHistory,
@@ -141,11 +142,17 @@ export default function App() {
   const handleInspectRecord = (rec: DiagnosticRecord) => {
     setActiveFile(null);
     setActiveMetrics(null);
+    const fallback = buildClientRepairRecommendations(
+      rec.prediction,
+      rec.confidence,
+      rec.confidence < 0.75
+    );
     setActiveReport({
       scan_id: rec.id,
       filename: rec.filename,
       mode: "dual",
       prediction: rec.prediction,
+      predicted_class: rec.predicted_class ?? fallback.predicted_class,
       confidence: rec.confidence,
       class_scores: {
         engine_knock: rec.knock_score,
@@ -155,11 +162,26 @@ export default function App() {
       duration_sec: rec.duration_sec,
       inference_ms: rec.inference_ms,
       created_at: rec.created_at,
-      uncertain: rec.prediction === "uncertain",
+      uncertain: rec.prediction === "uncertain" || rec.confidence < 0.75,
       disagree_std: 0,
       window_count: 1,
       windows: [],
       source: "history",
+      confidence_tier: rec.confidence_tier ?? fallback.confidence_tier,
+      uncertainty_warning: rec.uncertainty_warning ?? fallback.uncertainty_warning,
+      diagnosis_overview: rec.diagnosis_overview?.length
+        ? rec.diagnosis_overview
+        : fallback.diagnosis_overview,
+      possible_causes: rec.possible_causes ?? fallback.possible_causes,
+      recommended_inspections: rec.recommended_inspections?.length
+        ? rec.recommended_inspections
+        : fallback.recommended_inspections,
+      possible_repairs: rec.possible_repairs ?? fallback.possible_repairs,
+      safety_warning: rec.safety_warning ?? fallback.safety_warning,
+      maintenance_advice: rec.maintenance_advice?.length
+        ? rec.maintenance_advice
+        : fallback.maintenance_advice,
+      disclaimer: rec.disclaimer ?? fallback.disclaimer,
     });
     navigate("results");
   };
@@ -193,33 +215,33 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-[#FAFAF9] text-[#0F172A]">
+      <div className="min-h-screen bg-[#090D16] text-[#F8FAFC]">
         {menuOpen && (
           <button
             type="button"
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-30 bg-[#0F172A]/25 backdrop-blur-[1px] lg:hidden"
+            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-[1px] lg:hidden"
             aria-label="Close navigation"
           />
         )}
 
-        {/* Slim White Collapsible Sidebar */}
+        {/* Slim Dark Automotive Collapsible Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 bg-white border-r border-[#E7E5E4] flex flex-col transition-all duration-200 ease-out ${
+          className={`fixed inset-y-0 left-0 z-40 bg-[#0D1320] border-r border-[#1E293B] flex flex-col transition-all duration-200 ease-out ${
             sidebarCollapsed ? "lg:w-[72px]" : "lg:w-[240px]"
           } w-[240px] ${menuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         >
-          <div className="h-16 px-4 border-b border-[#E7E5E4] flex items-center justify-between gap-2">
+          <div className="h-16 px-4 border-b border-[#1E293B] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-8 w-8 rounded-[8px] bg-[#4F46E5] text-white flex items-center justify-center shrink-0">
+              <div className="h-8 w-8 rounded-[8px] bg-[#0284C7] border border-[#38BDF8]/40 text-white flex items-center justify-center shrink-0">
                 <Activity size={17} strokeWidth={1.75} />
               </div>
               {!sidebarCollapsed && (
                 <div className="truncate">
-                  <div className="text-[14px] font-semibold text-[#0F172A] leading-tight">
+                  <div className="text-[14px] font-semibold text-[#F8FAFC] leading-tight">
                     AutoGuard AI
                   </div>
-                  <div className="text-[11px] text-[#64748B]">Engine sound check</div>
+                  <div className="text-[11px] text-[#94A3B8]">Acoustic diagnostics</div>
                 </div>
               )}
             </div>
@@ -227,7 +249,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setSidebarCollapsed((c) => !c)}
-              className="hidden lg:inline-flex p-1.5 rounded-[8px] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F5F5F4] transition-colors"
+              className="hidden lg:inline-flex p-1.5 rounded-[8px] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors"
               aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {sidebarCollapsed ? (
@@ -240,7 +262,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
-              className="lg:hidden p-1.5 rounded-[8px] text-[#64748B] hover:text-[#0F172A]"
+              className="lg:hidden p-1.5 rounded-[8px] text-[#94A3B8] hover:text-[#F8FAFC]"
               aria-label="Close sidebar"
             >
               <X size={18} strokeWidth={1.5} />
@@ -261,8 +283,8 @@ export default function App() {
                     sidebarCollapsed ? "justify-center px-2" : "px-3"
                   } py-2 rounded-[8px] gap-3 text-[13px] font-medium transition-colors duration-150 ${
                     active
-                      ? "bg-[#EEF2FF] text-[#4F46E5]"
-                      : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F5F5F4]"
+                      ? "bg-[#0EA5E9]/15 text-[#38BDF8] border border-[#38BDF8]/30"
+                      : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]/60 border border-transparent"
                   }`}
                 >
                   <Icon size={17} strokeWidth={1.5} className="shrink-0" />
@@ -273,15 +295,15 @@ export default function App() {
           </nav>
 
           {/* Minimal Service Status */}
-          <div className="p-3 border-t border-[#E7E5E4]">
+          <div className="p-3 border-t border-[#1E293B]">
             <div
               className={`flex items-center ${
                 sidebarCollapsed ? "justify-center" : "px-3"
-              } py-1.5 gap-2.5 text-[12px] text-[#64748B]`}
+              } py-1.5 gap-2.5 text-[12px] text-[#94A3B8]`}
             >
               <span
                 className={`h-2 w-2 rounded-full shrink-0 ${
-                  isOnline ? "bg-[#16A34A]" : "bg-[#DC2626]"
+                  isOnline ? "bg-[#22C55E]" : "bg-[#EF4444]"
                 }`}
               />
               {!sidebarCollapsed && (
@@ -298,21 +320,21 @@ export default function App() {
           }`}
         >
           {/* Clean Top Bar */}
-          <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-sm border-b border-[#E7E5E4] px-4 sm:px-8 flex items-center justify-between gap-4 no-print">
+          <header className="sticky top-0 z-20 h-16 bg-[#0D1320]/90 backdrop-blur-md border-b border-[#1E293B] px-4 sm:px-8 flex items-center justify-between gap-4 no-print">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="lg:hidden p-1.5 rounded-[8px] border border-[#E7E5E4] text-[#64748B] hover:text-[#0F172A]"
+                className="lg:hidden p-1.5 rounded-[8px] border border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC]"
                 aria-label="Open navigation menu"
               >
                 <Menu size={18} strokeWidth={1.5} />
               </button>
 
               <div className="flex items-center gap-2 text-[13px] min-w-0">
-                <span className="hidden sm:inline text-[#64748B]">AutoGuard AI</span>
-                <ChevronRight size={14} strokeWidth={1.5} className="hidden sm:inline text-[#CBD5E1]" />
-                <h1 className="text-[14px] font-semibold text-[#0F172A] truncate">
+                <span className="hidden sm:inline text-[#94A3B8]">AutoGuard AI</span>
+                <ChevronRight size={14} strokeWidth={1.5} className="hidden sm:inline text-[#475569]" />
+                <h1 className="text-[14px] font-semibold text-[#F8FAFC] truncate">
                   {currentNav?.label}
                 </h1>
               </div>
@@ -321,11 +343,11 @@ export default function App() {
             <button
               type="button"
               onClick={() => setPaletteOpen(true)}
-              className="inline-flex items-center gap-2.5 h-9 px-3 rounded-[8px] border border-[#E7E5E4] bg-[#FAFAF9] hover:border-[#D6D3D1] text-[13px] text-[#64748B] transition-colors"
+              className="inline-flex items-center gap-2.5 h-9 px-3 rounded-[8px] border border-[#1E293B] bg-[#111827] hover:border-[#334155] text-[13px] text-[#94A3B8] transition-colors"
             >
               <Search size={14} strokeWidth={1.5} />
               <span className="hidden sm:inline">Search</span>
-              <kbd className="font-mono-data text-[11px] bg-white border border-[#E7E5E4] rounded-[4px] px-1.5 py-0.5 text-[#64748B]">
+              <kbd className="font-mono-data text-[11px] bg-[#090D16] border border-[#1E293B] rounded-[4px] px-1.5 py-0.5 text-[#94A3B8]">
                 ⌘K
               </kbd>
             </button>
@@ -333,12 +355,12 @@ export default function App() {
 
           <div className="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-8 py-8">
             {backendError && page !== "dashboard" && (
-              <div className="mb-6 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-[13px] text-[#DC2626] flex items-center justify-between gap-3">
+              <div className="mb-6 rounded-[12px] border border-[#EF4444]/40 bg-[#EF4444]/10 px-4 py-3 text-[13px] text-[#F87171] flex items-center justify-between gap-3">
                 <span>{backendError}</span>
                 <button
                   type="button"
                   onClick={() => setBackendError("")}
-                  className="text-[#DC2626] hover:opacity-75"
+                  className="text-[#F87171] hover:opacity-75"
                   aria-label="Dismiss error"
                 >
                   <X size={15} strokeWidth={1.5} />

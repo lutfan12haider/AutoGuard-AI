@@ -67,9 +67,9 @@ export function HistoryPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#0F172A] leading-tight">History</h2>
-          <p className="text-[14px] text-[#64748B] mt-1">
-            Review past engine checks or download your maintenance log.
+          <h2 className="text-[28px] font-semibold text-[#F8FAFC] leading-tight">History</h2>
+          <p className="text-[14px] text-[#94A3B8] mt-1">
+            Review past engine checks, inspect repair recommendations, or export your log.
           </p>
         </div>
 
@@ -93,13 +93,13 @@ export function HistoryPage({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Stat label="Total checks" value={(stats?.total_scans ?? records.length).toLocaleString()} />
         <Stat label="Healthy engines" value={(stats?.healthy_results ?? 0).toLocaleString()} />
-        <Stat label="Issues found" value={(stats?.detected_faults ?? 0).toLocaleString()} />
+        <Stat label="Fault patterns found" value={(stats?.detected_faults ?? 0).toLocaleString()} />
       </div>
 
       <Card className="overflow-hidden">
-        <div className="p-4 border-b border-[#E7E5E4] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="flex items-center gap-2 rounded-[8px] bg-[#FAFAF9] border border-[#E7E5E4] px-3 py-2 flex-1 focus-within:border-[#4F46E5]">
-            <Search size={15} strokeWidth={1.5} className="text-[#64748B]" />
+        <div className="p-4 border-b border-[#1E293B] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex items-center gap-2 rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3 py-2 flex-1 focus-within:border-[#38BDF8]">
+            <Search size={15} strokeWidth={1.5} className="text-[#94A3B8]" />
             <input
               value={query}
               onChange={(e) => {
@@ -107,7 +107,7 @@ export function HistoryPage({
                 setPage(1);
               }}
               placeholder="Search recordings..."
-              className="bg-transparent text-[13px] text-[#0F172A] placeholder-[#94A3B8] w-full outline-none"
+              className="bg-transparent text-[13px] text-[#F8FAFC] placeholder-[#64748B] w-full outline-none"
             />
           </div>
 
@@ -118,22 +118,22 @@ export function HistoryPage({
               setPage(1);
             }}
             aria-label="Filter by result"
-            className="rounded-[8px] bg-white border border-[#E7E5E4] px-3 py-2 text-[13px] text-[#0F172A] outline-none"
+            className="rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3 py-2 text-[13px] text-[#F8FAFC] outline-none"
           >
             <option value="all">All results</option>
-            <option value="healthy">Healthy Engine</option>
-            <option value="engine_knock">Engine Knock</option>
-            <option value="misfire">Engine Misfire</option>
+            <option value="healthy">Healthy</option>
+            <option value="engine_knock">Engine Knocking</option>
+            <option value="misfire">Misfire</option>
           </select>
 
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
             aria-label="Sort recordings"
-            className="rounded-[8px] bg-white border border-[#E7E5E4] px-3 py-2 text-[13px] text-[#0F172A] outline-none"
+            className="rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3 py-2 text-[13px] text-[#F8FAFC] outline-none"
           >
             <option value="newest">Newest first</option>
-            <option value="confidence_desc">Highest match</option>
+            <option value="confidence_desc">Highest confidence</option>
             <option value="duration_desc">Longest recording</option>
           </select>
         </div>
@@ -176,8 +176,8 @@ export function HistoryPage({
           <Table>
             <TableHeader>
               <th className="py-3 px-4">Recording</th>
-              <th className="py-3 px-4">Result</th>
-              <th className="py-3 px-4">Match</th>
+              <th className="py-3 px-4">Prediction</th>
+              <th className="py-3 px-4">Confidence</th>
               <th className="py-3 px-4">Length</th>
               <th className="py-3 px-4 text-right">Actions</th>
             </TableHeader>
@@ -189,12 +189,12 @@ export function HistoryPage({
                   <TableRow key={item.id}>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <FileAudio size={16} strokeWidth={1.5} className="text-[#4F46E5] shrink-0" />
+                        <FileAudio size={16} strokeWidth={1.5} className="text-[#38BDF8] shrink-0" />
                         <div className="min-w-0">
-                          <div className="text-[13px] font-medium text-[#0F172A] truncate max-w-[240px]">
+                          <div className="text-[13px] font-medium text-[#F8FAFC] truncate max-w-[240px]">
                             {item.filename}
                           </div>
-                          <div className="text-[12px] text-[#64748B]">
+                          <div className="text-[12px] text-[#94A3B8]">
                             {date} · {time}
                           </div>
                         </div>
@@ -203,10 +203,10 @@ export function HistoryPage({
                     <td className="py-3.5 px-4">
                       <StatusBadge prediction={item.prediction} shortLabel />
                     </td>
-                    <td className="py-3.5 px-4 font-mono-data text-[13px] font-semibold text-[#0F172A]">
+                    <td className="py-3.5 px-4 font-mono-data text-[13px] font-semibold text-[#F8FAFC]">
                       {confPct}%
                     </td>
-                    <td className="py-3.5 px-4 font-mono-data text-[12px] text-[#64748B]">
+                    <td className="py-3.5 px-4 font-mono-data text-[12px] text-[#94A3B8]">
                       {formatDuration(item.duration_sec)}
                     </td>
                     <td className="py-3.5 px-4 text-right">
@@ -234,7 +234,7 @@ export function HistoryPage({
                           }}
                           aria-label={`Delete ${item.filename}`}
                         >
-                          <Trash2 size={14} strokeWidth={1.5} className="text-[#64748B] hover:text-[#DC2626]" />
+                          <Trash2 size={14} strokeWidth={1.5} className="text-[#94A3B8] hover:text-[#F87171]" />
                         </Button>
                       </div>
                     </td>
@@ -246,7 +246,7 @@ export function HistoryPage({
         )}
 
         {filtered.length > PAGE_SIZE && (
-          <div className="px-4 py-3 border-t border-[#E7E5E4] flex items-center justify-between text-[13px] text-[#64748B]">
+          <div className="px-4 py-3 border-t border-[#1E293B] flex items-center justify-between text-[13px] text-[#94A3B8]">
             <span className="font-mono-data">
               {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of{" "}
               {filtered.length}

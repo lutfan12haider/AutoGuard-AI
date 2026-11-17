@@ -14,28 +14,28 @@ const SUBSYSTEM_INFO: Record<
   }
 > = {
   cylinders: {
-    title: "Cylinders & pistons",
-    healthyNote: "All four cylinders sound balanced and smooth.",
-    knockNote: "Check here first — knocking often comes from uneven fuel burn or worn bearings.",
-    misfireNote: "A cylinder may be skipping beats during idle.",
+    title: "Cylinders & combustion",
+    healthyNote: "All four cylinders sound balanced with no supported fault pattern.",
+    knockNote: "Check engine oil level, fuel octane quality, and internal component wear.",
+    misfireNote: "Irregular combustion cadence may occur when a cylinder misfires.",
   },
   ignition: {
-    title: "Spark plugs & coils",
-    healthyNote: "Firing rhythm sounds steady and consistent.",
-    knockNote: "Ask a mechanic to check ignition timing.",
-    misfireNote: "Most likely spot — worn spark plugs or weak coils cause engine misfires.",
+    title: "Spark plugs & ignition coils",
+    healthyNote: "Firing rhythm appears steady and consistent with the healthy class.",
+    knockNote: "Inspect ignition timing and combustion systems if knocking persists.",
+    misfireNote: "Inspect spark plugs and check ignition coils for wear or defects.",
   },
   knock_sensor: {
-    title: "Knock sensor area",
-    healthyNote: "No sharp metallic tapping heard on the engine block.",
-    knockNote: "Sharp tapping sounds detected — inspect the knock sensor and fuel grade.",
-    misfireNote: "Mild vibration present without sharp metallic knocking.",
+    title: "Combustion & knock sensor",
+    healthyNote: "No metallic knocking or pinging pattern detected on the engine block.",
+    knockNote: "Verify fuel quality and manufacturer octane requirements; inspect combustion systems.",
+    misfireNote: "Check for engine warning lights and diagnostic trouble codes.",
   },
   belt: {
-    title: "Drive belt & oil",
-    healthyNote: "Belt and moving parts sound quiet and lubricated.",
-    knockNote: "Make sure engine oil is clean and at the proper level.",
-    misfireNote: "Check belt tension and oil level, which can both cause rough running.",
+    title: "Lubrication & fuel delivery",
+    healthyNote: "Continue routine vehicle maintenance and monitor unusual sounds.",
+    knockNote: "Check engine oil level and condition; top up or replace using correct specification.",
+    misfireNote: "Inspect fuel injectors and check for fuel delivery issues.",
   },
 };
 
@@ -61,10 +61,10 @@ export function EngineSchematic({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-[12px] border border-[#E7E5E4] bg-[#FAFAF9] p-4">
-        <div className="flex items-center justify-between text-[12px] text-[#64748B] mb-2">
-          <span>Engine overview</span>
-          <span>Click a part to inspect</span>
+      <div className="rounded-[12px] border border-[#1E293B] bg-[#090D16] p-4">
+        <div className="flex items-center justify-between text-[12px] text-[#94A3B8] mb-2">
+          <span>Engine schematic</span>
+          <span>Click a subsystem to inspect</span>
         </div>
 
         <svg
@@ -85,23 +85,23 @@ export function EngineSchematic({
               width="76"
               height="116"
               rx="8"
-              fill="#FFFFFF"
-              stroke={selected === "belt" ? "#4F46E5" : isMisfire ? "#DC2626" : "#D6D3D1"}
+              fill="#111827"
+              stroke={selected === "belt" ? "#38BDF8" : isMisfire ? "#EF4444" : "#334155"}
               strokeWidth={selected === "belt" || isMisfire ? 1.8 : 1}
             />
             <path
               d="M52 78 L80 78 L90 154 L42 154 Z"
               fill="none"
-              stroke={isMisfire ? "#DC2626" : "#94A3B8"}
+              stroke={isMisfire ? "#EF4444" : "#64748B"}
               strokeWidth="3.5"
               strokeLinejoin="round"
             />
-            <circle cx="66" cy="84" r="13" fill="#F8FAFC" stroke="#64748B" strokeWidth="1.5" />
-            <circle cx="66" cy="84" r="3.5" fill="#4F46E5" />
-            <circle cx="52" cy="148" r="10" fill="#F8FAFC" stroke="#64748B" strokeWidth="1.5" />
-            <circle cx="82" cy="146" r="8" fill="#F8FAFC" stroke={isMisfire ? "#DC2626" : "#64748B"} strokeWidth="1.5" />
-            <text x="66" y="196" textAnchor="middle" fill="#64748B" fontSize="11" fontFamily="Inter">
-              Belt
+            <circle cx="66" cy="84" r="13" fill="#090D16" stroke="#64748B" strokeWidth="1.5" />
+            <circle cx="66" cy="84" r="3.5" fill="#38BDF8" />
+            <circle cx="52" cy="148" r="10" fill="#090D16" stroke="#64748B" strokeWidth="1.5" />
+            <circle cx="82" cy="146" r="8" fill="#090D16" stroke={isMisfire ? "#EF4444" : "#64748B"} strokeWidth="1.5" />
+            <text x="66" y="196" textAnchor="middle" fill="#94A3B8" fontSize="11" fontFamily="Inter">
+              Oil & Fuel
             </text>
           </g>
 
@@ -117,12 +117,12 @@ export function EngineSchematic({
               width="326"
               height="134"
               rx="8"
-              fill="#FFFFFF"
-              stroke={selected === "cylinders" ? "#4F46E5" : "#D6D3D1"}
+              fill="#111827"
+              stroke={selected === "cylinders" ? "#38BDF8" : "#334155"}
               strokeWidth={selected === "cylinders" ? 1.8 : 1.2}
             />
-            <rect x="132" y="28" width="306" height="24" rx="4" fill="#F5F5F4" stroke="#D6D3D1" strokeWidth="1" />
-            <path d="M140 186 L430 186 L414 204 L156 204 Z" fill="#F5F5F4" stroke="#E7E5E4" strokeWidth="1" />
+            <rect x="132" y="28" width="306" height="24" rx="4" fill="#1E293B" stroke="#334155" strokeWidth="1" />
+            <path d="M140 186 L430 186 L414 204 L156 204 Z" fill="#0F172A" stroke="#1E293B" strokeWidth="1" />
           </g>
 
           {/* 4 Cylinders + Pistons + Spark Coils */}
@@ -132,11 +132,11 @@ export function EngineSchematic({
             const cylFault = (isKnock && idx === 2) || (isMisfire && idx === 1);
             const cylColor = cylFault
               ? isKnock
-                ? "#D97706"
-                : "#DC2626"
+                ? "#F59E0B"
+                : "#EF4444"
               : isHealthy
-                ? "#16A34A"
-                : "#4F46E5";
+                ? "#22C55E"
+                : "#38BDF8";
 
             return (
               <g key={idx}>
@@ -146,8 +146,8 @@ export function EngineSchematic({
                   width="48"
                   height="94"
                   rx="4"
-                  fill="#FAFAF9"
-                  stroke={cylFault ? cylColor : "#E7E5E4"}
+                  fill="#090D16"
+                  stroke={cylFault ? cylColor : "#1E293B"}
                   strokeWidth={cylFault ? 1.6 : 1}
                 />
 
@@ -157,11 +157,11 @@ export function EngineSchematic({
                   rx="16"
                   ry="7"
                   fill={cylColor}
-                  opacity={cylFault ? 0.35 : 0.14}
+                  opacity={cylFault ? 0.4 : 0.18}
                 >
                   <animate
                     attributeName="opacity"
-                    values={cylFault ? "0.15;0.45;0.15" : "0.08;0.22;0.08"}
+                    values={cylFault ? "0.2;0.55;0.2" : "0.1;0.26;0.1"}
                     dur={isMisfire && idx === 1 ? "0.8s" : `${1.2 + idx * 0.25}s`}
                     repeatCount="indefinite"
                   />
@@ -173,13 +173,13 @@ export function EngineSchematic({
                   width="38"
                   height="24"
                   rx="3"
-                  fill="#E2E8F0"
-                  stroke={cylFault ? cylColor : "#94A3B8"}
+                  fill="#1E293B"
+                  stroke={cylFault ? cylColor : "#64748B"}
                   strokeWidth="1.2"
                 />
-                <line x1={cx - 16} y1={pistonY + 6} x2={cx + 16} y2={pistonY + 6} stroke="#94A3B8" strokeWidth="1" />
-                <line x1={cx} y1={pistonY + 24} x2={cx} y2="172" stroke="#94A3B8" strokeWidth="3.5" />
-                <circle cx={cx} cy="172" r="5.5" fill="#FFFFFF" stroke="#64748B" strokeWidth="1.5" />
+                <line x1={cx - 16} y1={pistonY + 6} x2={cx + 16} y2={pistonY + 6} stroke="#64748B" strokeWidth="1" />
+                <line x1={cx} y1={pistonY + 24} x2={cx} y2="172" stroke="#64748B" strokeWidth="3.5" />
+                <circle cx={cx} cy="172" r="5.5" fill="#090D16" stroke="#94A3B8" strokeWidth="1.5" />
 
                 <g
                   onClick={() => setSelected("ignition")}
@@ -192,8 +192,8 @@ export function EngineSchematic({
                     width="16"
                     height="22"
                     rx="3"
-                    fill="#FFFFFF"
-                    stroke={isMisfire && idx === 1 ? "#DC2626" : selected === "ignition" ? "#4F46E5" : "#CBD5E1"}
+                    fill="#090D16"
+                    stroke={isMisfire && idx === 1 ? "#EF4444" : selected === "ignition" ? "#38BDF8" : "#475569"}
                     strokeWidth="1.4"
                   />
                   <line
@@ -201,13 +201,13 @@ export function EngineSchematic({
                     y1="37"
                     x2={cx}
                     y2="64"
-                    stroke={isMisfire && idx === 1 ? "#DC2626" : "#4F46E5"}
+                    stroke={isMisfire && idx === 1 ? "#EF4444" : "#38BDF8"}
                     strokeWidth="1.8"
                   />
-                  <circle cx={cx} cy="22" r="2.5" fill={isMisfire && idx === 1 ? "#DC2626" : "#4F46E5"} />
+                  <circle cx={cx} cy="22" r="2.5" fill={isMisfire && idx === 1 ? "#EF4444" : "#38BDF8"} />
                 </g>
 
-                <text x={cx} y="198" textAnchor="middle" fill="#64748B" fontSize="10" fontFamily="JetBrains Mono">
+                <text x={cx} y="198" textAnchor="middle" fill="#94A3B8" fontSize="10" fontFamily="JetBrains Mono">
                   {idx + 1}
                 </text>
               </g>
@@ -226,20 +226,20 @@ export function EngineSchematic({
               width="70"
               height="86"
               rx="8"
-              fill="#FFFFFF"
-              stroke={isKnock ? "#D97706" : selected === "knock_sensor" ? "#4F46E5" : "#D6D3D1"}
+              fill="#111827"
+              stroke={isKnock ? "#F59E0B" : selected === "knock_sensor" ? "#38BDF8" : "#334155"}
               strokeWidth={isKnock || selected === "knock_sensor" ? 1.8 : 1}
             />
-            <line x1="448" y1="116" x2="466" y2="116" stroke={isKnock ? "#D97706" : "#4F46E5"} strokeWidth="2" />
-            <circle cx="501" cy="110" r="13" fill="none" stroke={isKnock ? "#D97706" : "#4F46E5"} strokeWidth="1.4" strokeDasharray="3 2" />
+            <line x1="448" y1="116" x2="466" y2="116" stroke={isKnock ? "#F59E0B" : "#38BDF8"} strokeWidth="2" />
+            <circle cx="501" cy="110" r="13" fill="none" stroke={isKnock ? "#F59E0B" : "#38BDF8"} strokeWidth="1.4" strokeDasharray="3 2" />
             {isKnock && (
-              <circle cx="501" cy="110" r="20" fill="none" stroke="#D97706" strokeWidth="1.2" opacity="0.5">
+              <circle cx="501" cy="110" r="20" fill="none" stroke="#F59E0B" strokeWidth="1.2" opacity="0.5">
                 <animate attributeName="r" values="12;24" dur="1.2s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="0.7;0" dur="1.2s" repeatCount="indefinite" />
               </circle>
             )}
-            <circle cx="501" cy="110" r="4.5" fill={isKnock ? "#D97706" : "#4F46E5"} />
-            <text x="501" y="144" textAnchor="middle" fill="#64748B" fontSize="10" fontFamily="Inter">
+            <circle cx="501" cy="110" r="4.5" fill={isKnock ? "#F59E0B" : "#38BDF8"} />
+            <text x="501" y="144" textAnchor="middle" fill="#94A3B8" fontSize="10" fontFamily="Inter">
               Sensor
             </text>
           </g>
@@ -249,8 +249,8 @@ export function EngineSchematic({
       {/* Clean Subsystem Summary */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="text-[14px] font-semibold text-[#0F172A]">{info.title}</div>
-          <p className="text-[13px] text-[#64748B] mt-0.5">{zoneStatusText}</p>
+          <div className="text-[14px] font-semibold text-[#F8FAFC]">{info.title}</div>
+          <p className="text-[13px] text-[#94A3B8] mt-0.5">{zoneStatusText}</p>
         </div>
 
         <Tabs
@@ -259,9 +259,9 @@ export function EngineSchematic({
           layoutId="schematic-zone-tab"
           items={[
             { id: "cylinders", label: "Cylinders" },
-            { id: "ignition", label: "Spark plugs" },
-            { id: "knock_sensor", label: "Sensor" },
-            { id: "belt", label: "Belt" },
+            { id: "ignition", label: "Ignition" },
+            { id: "knock_sensor", label: "Combustion" },
+            { id: "belt", label: "Oil & Fuel" },
           ]}
         />
       </div>

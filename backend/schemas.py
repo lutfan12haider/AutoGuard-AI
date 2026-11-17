@@ -20,37 +20,75 @@ class WindowResult(BaseModel):
     reason:     Optional[str]  = None
 
 
+class RepairRecommendationPayload(BaseModel):
+    """Structured repair recommendation payload for healthy, misfire, and engine_knock"""
+    predicted_class:         str
+    display_label:           str           = ""
+    confidence:              float
+    confidence_tier:         str           = "high"   # high | moderate | low | unsupported
+    uncertainty_warning:     Optional[str] = None
+    diagnosis_overview:      list[str]     = []
+    possible_causes:         list[str]     = []
+    recommended_inspections: list[str]     = []
+    possible_repairs:        list[str]     = []
+    safety_warning:          Optional[str] = None
+    maintenance_advice:      list[str]     = []
+    disclaimer:              Optional[str] = None
+
+
 class AnalysisResult(BaseModel):
-    """Response from POST /api/analyze"""
-    scan_id:          int
-    filename:         str
-    prediction:       str           # engine_knock | healthy | misfire | uncertain
-    confidence:       float         # 0.0 – 1.0
-    class_scores:     dict[str, float]
-    duration_sec:     float
-    inference_ms:     float
-    created_at:       str
+    """Response from POST /api/analyze and POST /api/consensus"""
+    scan_id:                 int
+    filename:                str
+    prediction:              str           # engine_knock | healthy | misfire | uncertain
+    predicted_class:         str           = ""
+    confidence:              float         # 0.0 – 1.0
+    class_scores:            dict[str, float]
+    duration_sec:            float
+    inference_ms:            float
+    created_at:              str
     # windowed inference fields
-    window_count:     int           = 1
-    windows:          list[WindowResult] = []
-    uncertain:        bool          = False
-    uncertain_reason: Optional[str] = None
-    model_prediction: Optional[str] = None   # actual model vote before abstain
-    disagree_std:     float         = 0.0
+    window_count:            int           = 1
+    windows:                 list[WindowResult] = []
+    uncertain:               bool          = False
+    uncertain_reason:        Optional[str] = None
+    model_prediction:        Optional[str] = None   # actual model vote before abstain
+    disagree_std:            float         = 0.0
+    # Repair Recommendation System fields
+    confidence_tier:         str           = "high"
+    uncertainty_warning:     Optional[str] = None
+    diagnosis_overview:      list[str]     = []
+    possible_causes:         list[str]     = []
+    recommended_inspections: list[str]     = []
+    possible_repairs:        list[str]     = []
+    safety_warning:          Optional[str] = None
+    maintenance_advice:      list[str]     = []
+    disclaimer:              Optional[str] = None
+    repair_recommendations:  Optional[RepairRecommendationPayload] = None
 
 
 class DiagnosticRecord(BaseModel):
     """A single record from the history table"""
-    id:             int
-    filename:       str
-    prediction:     str
-    confidence:     float
-    knock_score:    float
-    healthy_score:  float
-    misfire_score:  float
-    duration_sec:   float
-    inference_ms:   float
-    created_at:     str
+    id:                      int
+    filename:                str
+    prediction:              str
+    predicted_class:         str           = ""
+    confidence:              float
+    knock_score:             float
+    healthy_score:           float
+    misfire_score:           float
+    duration_sec:            float
+    inference_ms:            float
+    created_at:              str
+    confidence_tier:         str           = "high"
+    uncertainty_warning:     Optional[str] = None
+    diagnosis_overview:      list[str]     = []
+    possible_causes:         list[str]     = []
+    recommended_inspections: list[str]     = []
+    possible_repairs:        list[str]     = []
+    safety_warning:          Optional[str] = None
+    maintenance_advice:      list[str]     = []
+    disclaimer:              Optional[str] = None
 
 
 class HistoryResponse(BaseModel):
@@ -88,10 +126,24 @@ class ErrorResponse(BaseModel):
 
 class DiagnoseResult(BaseModel):
     """Response from POST /api/diagnose  (PyTorch CNN model)"""
-    prediction:        str                  # human-readable class name
-    confidence_scores: dict[str, float]     # {class_name: probability}  sums to 1.0
-    duration_sec:      float
-    inference_ms:      float
-    model:             str = "AutoGuardCNN"
-    scan_id:           Optional[int] = None
-    created_at:        Optional[str] = None
+    prediction:              str                  # human-readable class name
+    predicted_class:         str                  = ""
+    confidence:              float                = 0.0
+    confidence_scores:       dict[str, float]     # {class_name: probability}  sums to 1.0
+    duration_sec:            float
+    inference_ms:            float
+    model:                   str                  = "AutoGuardCNN"
+    scan_id:                 Optional[int]        = None
+    created_at:              Optional[str]        = None
+    uncertain:               bool                 = False
+    uncertain_reason:        Optional[str]        = None
+    confidence_tier:         str                  = "high"
+    uncertainty_warning:     Optional[str]        = None
+    diagnosis_overview:      list[str]            = []
+    possible_causes:         list[str]            = []
+    recommended_inspections: list[str]            = []
+    possible_repairs:        list[str]            = []
+    safety_warning:          Optional[str]        = None
+    maintenance_advice:      list[str]            = []
+    disclaimer:              Optional[str]        = None
+    repair_recommendations:  Optional[RepairRecommendationPayload] = None

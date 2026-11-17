@@ -3,7 +3,7 @@ import { Card } from "./ui";
 
 export function SparklineChart({
   values,
-  color = "#4F46E5",
+  color = "#38BDF8",
   height = 32,
 }: {
   values: number[];
@@ -14,7 +14,7 @@ export function SparklineChart({
     return (
       <div className="flex items-end gap-0.5 h-7 opacity-40">
         {[35, 50, 42, 68, 60, 75, 65, 82].map((v, i) => (
-          <div key={i} className="w-1 rounded-full bg-[#CBD5E1]" style={{ height: `${v}%` }} />
+          <div key={i} className="w-1 rounded-full bg-[#475569]" style={{ height: `${v}%` }} />
         ))}
       </div>
     );
@@ -36,12 +36,12 @@ export function SparklineChart({
   return (
     <svg width={w} height={height} viewBox={`0 0 ${w} ${height}`} className="overflow-visible">
       <defs>
-        <linearGradient id={`spark-light-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.16" />
+        <linearGradient id={`spark-dark-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polygon points={areaPts} fill={`url(#spark-light-${color.replace("#", "")})`} />
+      <polygon points={areaPts} fill={`url(#spark-dark-${color.replace("#", "")})`} />
       <polyline
         fill="none"
         stroke={color}
@@ -92,18 +92,18 @@ export function CnnEpochChart({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between flex-wrap gap-2 text-[12px]">
-        <div className="flex items-center gap-4 text-[#475569]">
+        <div className="flex items-center gap-4 text-[#CBD5E1]">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-[#4F46E5]" /> Train loss
+            <span className="w-3 h-0.5 bg-[#38BDF8]" /> Train loss
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-[#D97706]" /> Validation loss
+            <span className="w-3 h-0.5 bg-[#F59E0B]" /> Validation loss
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-[#16A34A]" /> Validation accuracy
+            <span className="w-3 h-0.5 bg-[#22C55E]" /> Validation accuracy
           </span>
         </div>
-        <div className="font-mono-data text-[12px] text-[#64748B]">
+        <div className="font-mono-data text-[12px] text-[#94A3B8]">
           {active
             ? `Epoch ${active.epoch}: train=${active.train_loss.toFixed(3)} · val=${active.val_loss.toFixed(3)} · acc=${(active.val_acc * 100).toFixed(1)}%`
             : "Hover points to inspect epoch metrics"}
@@ -112,7 +112,7 @@ export function CnnEpochChart({
 
       <svg
         viewBox={`0 0 ${w} ${h}`}
-        className="w-full h-52 rounded-[8px] bg-[#FAFAF9] border border-[#E7E5E4]"
+        className="w-full h-52 rounded-[8px] bg-[#090D16] border border-[#1E293B]"
       >
         {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
           const y = padT + frac * plotH;
@@ -120,20 +120,20 @@ export function CnnEpochChart({
           const accTick = `${Math.round((1 - frac) * 100)}%`;
           return (
             <g key={frac}>
-              <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#E7E5E4" strokeWidth="1" />
-              <text x={padL - 6} y={y + 3} textAnchor="end" fill="#64748B" fontSize="10" fontFamily="JetBrains Mono">
+              <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#1E293B" strokeWidth="1" />
+              <text x={padL - 6} y={y + 3} textAnchor="end" fill="#94A3B8" fontSize="10" fontFamily="JetBrains Mono">
                 {lossTick}
               </text>
-              <text x={w - padR + 6} y={y + 3} textAnchor="start" fill="#16A34A" fontSize="10" fontFamily="JetBrains Mono">
+              <text x={w - padR + 6} y={y + 3} textAnchor="start" fill="#22C55E" fontSize="10" fontFamily="JetBrains Mono">
                 {accTick}
               </text>
             </g>
           );
         })}
 
-        <polyline fill="none" stroke="#4F46E5" strokeWidth="2.2" points={trainPath} />
-        <polyline fill="none" stroke="#D97706" strokeWidth="2.2" points={valPath} />
-        <polyline fill="none" stroke="#16A34A" strokeWidth="2" strokeDasharray="4 3" points={accPath} />
+        <polyline fill="none" stroke="#38BDF8" strokeWidth="2.2" points={trainPath} />
+        <polyline fill="none" stroke="#F59E0B" strokeWidth="2.2" points={valPath} />
+        <polyline fill="none" stroke="#22C55E" strokeWidth="2" strokeDasharray="4 3" points={accPath} />
 
         {epochs.map((e, i) => {
           const x = xFor(i);
@@ -149,13 +149,13 @@ export function CnnEpochChart({
                 y1={padT}
                 x2={x}
                 y2={h - padB}
-                stroke={hoverEpoch === e.epoch ? "rgba(79, 70, 229, 0.14)" : "transparent"}
+                stroke={hoverEpoch === e.epoch ? "rgba(56, 189, 248, 0.16)" : "transparent"}
                 strokeWidth="12"
               />
-              <circle cx={x} cy={yLoss(e.train_loss)} r="4" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="1.5" />
-              <circle cx={x} cy={yLoss(e.val_loss)} r="4" fill="#D97706" stroke="#FFFFFF" strokeWidth="1.5" />
-              <circle cx={x} cy={yAcc(e.val_acc)} r="4" fill="#16A34A" stroke="#FFFFFF" strokeWidth="1.5" />
-              <text x={x} y={h - 9} textAnchor="middle" fill="#64748B" fontSize="10" fontFamily="JetBrains Mono">
+              <circle cx={x} cy={yLoss(e.train_loss)} r="4" fill="#38BDF8" stroke="#090D16" strokeWidth="1.5" />
+              <circle cx={x} cy={yLoss(e.val_loss)} r="4" fill="#F59E0B" stroke="#090D16" strokeWidth="1.5" />
+              <circle cx={x} cy={yAcc(e.val_acc)} r="4" fill="#22C55E" stroke="#090D16" strokeWidth="1.5" />
+              <text x={x} y={h - 9} textAnchor="middle" fill="#94A3B8" fontSize="10" fontFamily="JetBrains Mono">
                 Ep {e.epoch}
               </text>
             </g>
@@ -183,13 +183,13 @@ export function ConfusionMatrixCard({
   return (
     <Card flat className="p-5 flex flex-col gap-4">
       <div>
-        <h4 className="text-[16px] font-semibold text-[#0F172A]">{title}</h4>
-        <p className="text-[13px] text-[#64748B] mt-0.5">{subtitle}</p>
+        <h4 className="text-[16px] font-semibold text-[#F8FAFC]">{title}</h4>
+        <p className="text-[13px] text-[#94A3B8] mt-0.5">{subtitle}</p>
       </div>
 
       <div className="overflow-x-auto">
         <div className="min-w-[260px]">
-          <div className="grid grid-cols-[76px_repeat(3,1fr)] gap-1.5 text-[11px] font-medium text-[#64748B] mb-1.5">
+          <div className="grid grid-cols-[76px_repeat(3,1fr)] gap-1.5 text-[11px] font-medium text-[#94A3B8] mb-1.5">
             <div className="text-right pr-2">True \ Pred</div>
             {classes.map((c) => (
               <div key={c} className="text-center">
@@ -202,17 +202,17 @@ export function ConfusionMatrixCard({
             const rowSum = row.reduce((a, b) => a + b, 0) || 1;
             return (
               <div key={rIdx} className="grid grid-cols-[76px_repeat(3,1fr)] gap-1.5 mb-1.5">
-                <div className="flex items-center justify-end pr-2 text-[12px] font-medium text-[#475569]">
+                <div className="flex items-center justify-end pr-2 text-[12px] font-medium text-[#CBD5E1]">
                   {shortName(classes[rIdx] || "")}
                 </div>
                 {row.map((val, cIdx) => {
                   const ratio = val / rowSum;
                   const isDiag = rIdx === cIdx;
                   const cls = isDiag
-                    ? "bg-[#F0FDF4] border-[#BBF7D0] text-[#16A34A]"
+                    ? "bg-[#22C55E]/15 border-[#22C55E]/35 text-[#4ADE80]"
                     : val > 0
-                      ? "bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]"
-                      : "bg-[#FAFAF9] border-[#E7E5E4] text-[#94A3B8]";
+                      ? "bg-[#EF4444]/15 border-[#EF4444]/35 text-[#F87171]"
+                      : "bg-[#090D16] border-[#1E293B] text-[#64748B]";
                   return (
                     <div
                       key={cIdx}

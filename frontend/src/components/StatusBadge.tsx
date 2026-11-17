@@ -22,9 +22,9 @@ export function StatusBadge({
     ? tone === "healthy"
       ? "Healthy"
       : tone === "knock"
-        ? "Warning · Knock"
+        ? "Engine Knocking"
         : tone === "misfire"
-          ? "Fault · Misfire"
+          ? "Misfire"
           : "Unclear"
     : predictionToLabel(prediction);
 
@@ -43,10 +43,10 @@ export function ConditionIcon({
   size?: number;
 }) {
   const tone = predictionToTone(prediction);
-  if (tone === "healthy") return <CheckCircle2 size={size} strokeWidth={1.5} className="text-[#16A34A]" />;
-  if (tone === "knock") return <AlertTriangle size={size} strokeWidth={1.5} className="text-[#D97706]" />;
-  if (tone === "uncertain") return <HelpCircle size={size} strokeWidth={1.5} className="text-[#4F46E5]" />;
-  return <ShieldAlert size={size} strokeWidth={1.5} className="text-[#DC2626]" />;
+  if (tone === "healthy") return <CheckCircle2 size={size} strokeWidth={1.5} className="text-[#4ADE80]" />;
+  if (tone === "knock") return <AlertTriangle size={size} strokeWidth={1.5} className="text-[#FBBF24]" />;
+  if (tone === "uncertain") return <HelpCircle size={size} strokeWidth={1.5} className="text-[#38BDF8]" />;
+  return <ShieldAlert size={size} strokeWidth={1.5} className="text-[#F87171]" />;
 }
 
 export function ConfidenceGauge({
@@ -70,11 +70,11 @@ export function ConfidenceGauge({
   const filledLen = (clamped / 100) * circumference;
 
   const strokeColor = {
-    healthy: "#16A34A",
-    knock: "#D97706",
-    misfire: "#DC2626",
-    uncertain: "#4F46E5",
-    accent: "#4F46E5",
+    healthy: "#22C55E",
+    knock: "#F59E0B",
+    misfire: "#EF4444",
+    uncertain: "#38BDF8",
+    accent: "#38BDF8",
   }[tone];
 
   return (
@@ -88,7 +88,7 @@ export function ConfidenceGauge({
           cy={center}
           r={radius}
           fill="none"
-          stroke="#F1F5F9"
+          stroke="#1E293B"
           strokeWidth={strokeWidth}
         />
         <circle
@@ -106,12 +106,12 @@ export function ConfidenceGauge({
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="font-mono-data text-[28px] leading-none font-semibold text-[#0F172A]">
+        <span className="font-mono-data text-[28px] leading-none font-semibold text-[#F8FAFC]">
           {Math.round(clamped)}
-          <span className="text-[16px] text-[#64748B] font-normal">%</span>
+          <span className="text-[16px] text-[#94A3B8] font-normal">%</span>
         </span>
-        <span className="text-[12px] font-medium text-[#64748B] mt-1">{label}</span>
-        {sublabel && <span className="text-[11px] text-[#94A3B8] mt-0.5">{sublabel}</span>}
+        <span className="text-[12px] font-medium text-[#94A3B8] mt-1">{label}</span>
+        {sublabel && <span className="text-[11px] text-[#64748B] mt-0.5">{sublabel}</span>}
       </div>
     </div>
   );
