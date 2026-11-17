@@ -142,11 +142,11 @@ export function DiagnosisPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#F8FAFC] leading-tight">
+          <h2 className="text-[28px] font-semibold text-[var(--text)] leading-tight">
             Check your engine
           </h2>
-          <p className="text-[14px] text-[#94A3B8] mt-1">
-            Upload or record an engine clip to classify Healthy, Misfire, or Engine Knocking and generate repair guidance.
+          <p className="text-[14px] text-[var(--text-muted)] mt-1">
+            Upload or record an engine clip to classify Healthy, Misfire, or Engine Knocking and inspect 3D components.
           </p>
         </div>
 
@@ -237,8 +237,8 @@ export function DiagnosisPage({
 
                   {tab === "samples" && (
                     <div className="space-y-4">
-                      <p className="text-[13px] text-[#94A3B8]">
-                        Select a real engine recording from the dataset to test classification and repair recommendations.
+                      <p className="text-[13px] text-[var(--text-muted)]">
+                        Select a real engine recording from the dataset to test classification, 3D component highlights, and repair recommendations.
                       </p>
 
                       {curatedSamples.length === 0 ? (
@@ -255,17 +255,17 @@ export function DiagnosisPage({
                               type="button"
                               disabled={loadingSampleId === s.id}
                               onClick={() => handleSelectSample(s)}
-                              className="rounded-[10px] border border-[#1E293B] hover:border-[#38BDF8]/60 bg-[#090D16] hover:bg-[#0EA5E9]/10 p-4 text-left transition-all flex items-center justify-between gap-3"
+                              className="rounded-[10px] border border-[var(--border)] hover:border-[#38BDF8] bg-[var(--surface-subtle)] p-4 text-left transition-all flex items-center justify-between gap-3"
                             >
                               <div className="min-w-0">
-                                <div className="text-[14px] font-semibold text-[#F8FAFC]">
+                                <div className="text-[14px] font-semibold text-[var(--text)]">
                                   {predictionToLabel(s.expected_class)} #{(idx % 2) + 1}
                                 </div>
-                                <div className="text-[12px] text-[#94A3B8] truncate mt-0.5">
+                                <div className="text-[12px] text-[var(--text-muted)] truncate mt-0.5">
                                   {s.filename}
                                 </div>
                               </div>
-                              <span className="shrink-0 h-8 w-8 rounded-full bg-[#111827] border border-[#1E293B] flex items-center justify-center text-[#38BDF8]">
+                              <span className="shrink-0 h-8 w-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[#38BDF8]">
                                 <Play size={13} strokeWidth={1.5} className="ml-0.5" />
                               </span>
                             </button>
@@ -283,16 +283,16 @@ export function DiagnosisPage({
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   className="space-y-4"
                 >
-                  <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-[#1E293B]">
+                  <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-[var(--border)]">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="h-10 w-10 rounded-[8px] bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] flex items-center justify-center shrink-0">
                         <FileAudio size={18} strokeWidth={1.5} />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-[14px] font-semibold text-[#F8FAFC] truncate">
+                        <div className="text-[14px] font-semibold text-[var(--text)] truncate">
                           {file.name}
                         </div>
-                        <div className="text-[12px] text-[#94A3B8] font-mono-data">
+                        <div className="text-[12px] text-[var(--text-muted)] font-mono-data">
                           {(file.size / 1024).toFixed(0)} KB
                         </div>
                       </div>
@@ -320,7 +320,7 @@ export function DiagnosisPage({
               </div>
             )}
 
-            <div className="flex items-center justify-end pt-2 border-t border-[#1E293B]">
+            <div className="flex items-center justify-end pt-2 border-t border-[var(--border)]">
               <Button
                 type="button"
                 size="lg"
@@ -334,46 +334,58 @@ export function DiagnosisPage({
           </Card>
         </div>
 
-        {/* Recording Tips */}
-        <aside className="xl:col-span-4">
-          <Card className="p-6 space-y-5">
-            <div>
-              <h3 className="text-[16px] font-semibold text-[#F8FAFC]">Tips for a clear recording</h3>
-              <p className="text-[13px] text-[#94A3B8] mt-1">
-                Follow these steps for high-confidence acoustic screening.
-              </p>
+        {/* Right: Luxury Engine Bay Photography + Recording Tips */}
+        <aside className="xl:col-span-4 space-y-6">
+          <Card className="overflow-hidden">
+            <div className="relative h-40 bg-[#070A12]">
+              <img
+                src="/images/hero-luxury-sedan.jpg"
+                alt="Acoustic diagnostic bay"
+                className="w-full h-full object-cover opacity-90"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#070A12] via-[#070A12]/30 to-transparent" />
+              <div className="absolute bottom-3 left-4 right-4">
+                <span className="text-[11px] font-mono-data text-[#38BDF8] uppercase">
+                  Acoustic Capture Protocol
+                </span>
+                <h3 className="text-[15px] font-semibold text-white">
+                  Tips for a High-Confidence Scan
+                </h3>
+              </div>
             </div>
 
-            <ol className="space-y-4">
-              {[
-                {
-                  title: "Warm up your car",
-                  desc: "Let the engine reach normal idle temperature before recording.",
-                },
-                {
-                  title: "Hold 1–2 feet away",
-                  desc: "Position your microphone near the open hood, away from wind or traffic.",
-                },
-                {
-                  title: "Record 10–15 seconds",
-                  desc: "Keep the engine idling steadily while you capture audio.",
-                },
-                {
-                  title: "Avoid contact noise",
-                  desc: "Do not rest your phone or microphone directly on vibrating parts.",
-                },
-              ].map((tip, idx) => (
-                <li key={tip.title} className="flex items-start gap-3">
-                  <span className="h-6 w-6 rounded-full bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <div>
-                    <div className="text-[14px] font-medium text-[#F8FAFC]">{tip.title}</div>
-                    <p className="text-[13px] text-[#94A3B8] mt-0.5">{tip.desc}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+            <div className="p-5">
+              <ol className="space-y-4">
+                {[
+                  {
+                    title: "Warm up your car",
+                    desc: "Let the engine reach normal idle temperature before recording.",
+                  },
+                  {
+                    title: "Hold 1–2 feet away",
+                    desc: "Position your microphone near the open hood, away from wind or traffic.",
+                  },
+                  {
+                    title: "Record 10–15 seconds",
+                    desc: "Keep the engine idling steadily while you capture audio.",
+                  },
+                  {
+                    title: "Avoid contact noise",
+                    desc: "Do not rest your phone or microphone directly on vibrating parts.",
+                  },
+                ].map((tip, idx) => (
+                  <li key={tip.title} className="flex items-start gap-3">
+                    <span className="h-6 w-6 rounded-full bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <div className="text-[14px] font-medium text-[var(--text)]">{tip.title}</div>
+                      <p className="text-[13px] text-[var(--text-muted)] mt-0.5">{tip.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </Card>
         </aside>
       </div>

@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import {
   Activity,
+  Box,
   ChevronRight,
   FileSearch,
   History,
   LayoutDashboard,
   Menu,
+  Moon,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  Sun,
   X,
 } from "lucide-react";
 import type {
@@ -20,6 +23,7 @@ import type {
   InferenceMode,
   SampleAudioItem,
   StatsResponse,
+  ThemeMode,
   UnifiedDiagnosticReport,
 } from "./types/diagnostic";
 import {
@@ -32,6 +36,7 @@ import {
   fetchStats,
   loadSettings,
   runUnifiedDiagnosis,
+  saveSettings,
 } from "./services/api";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DiagnosisPage } from "./pages/DiagnosisPage";
@@ -39,13 +44,19 @@ import { ResultsPage } from "./pages/ResultsPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { CommandPalette } from "./components/CommandPalette";
 import { AnalyzingOverlay } from "./components/Modals";
+import { Skeleton } from "./components/ui";
+
+const LazyEngineLabPage = lazy(() =>
+  import("./pages/EngineLabPage").then((m) => ({ default: m.EngineLabPage }))
+);
 
 export default function App() {
   const [page, setPage] = useState<AppPage>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const settings = loadSettings();
+  const [settings, setSettings] = useState(() => loadSettings());
+  const theme: ThemeMode = settings.theme || "dark";
 
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -62,6 +73,19 @@ export default function App() {
   const [preloadedFile, setPreloadedFile] = useState<File | null>(null);
   const [preloadedSource, setPreloadedSource] = useState<"upload" | "mic" | "sample">("sample");
   const [preloadedExpected, setPreloadedExpected] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setSettings((prev) => {
+      const nextTheme: ThemeMode = (prev.theme || "dark") === "dark" ? "light" : "dark";
+      const updated = { ...prev, theme: nextTheme };
+      saveSettings(updated);
+      return updated;
+    });
+  }, []);
 
   const refreshBackendData = useCallback(async () => {
     try {
@@ -80,7 +104,9 @@ export default function App() {
         setBackendError(hRes.reason?.message || "Service offline");
       }
       if (sRes.status === "fulfilled") setStats(sRes.value);
-      if (histRes.status === "fulfilled") setRecords(histRes.value.records);
+      if (histRes.status === "fulfilled") {
+        setRecords(histRes.value.records);
+      }
       if (sampRes.status === "fulfilled") setSamples(sampRes.value.samples);
     } finally {
       setLoadingDash(false);
@@ -205,6 +231,7 @@ export default function App() {
 
   const navItems: Array<{ id: AppPage; label: string; icon: typeof LayoutDashboard }> = [
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+    { id: "engine_lab", label: "3D Engine Lab", icon: Box },
     { id: "diagnosis", label: "Check engine", icon: Activity },
     { id: "results", label: "Results", icon: FileSearch },
     { id: "history", label: "History", icon: History },
@@ -215,7 +242,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-[#090D16] text-[#F8FAFC]">
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
         {menuOpen && (
           <button
             type="button"
@@ -225,23 +252,23 @@ export default function App() {
           />
         )}
 
-        {/* Slim Dark Automotive Collapsible Sidebar */}
+        {/* Collapsible Luxury Automotive Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 bg-[#0D1320] border-r border-[#1E293B] flex flex-col transition-all duration-200 ease-out ${
+          className={`fixed inset-y-0 left-0 z-40 bg-[var(--sidebar-bg)] border-r border-[var(--border)] flex flex-col transition-all duration-200 ease-out ${
             sidebarCollapsed ? "lg:w-[72px]" : "lg:w-[240px]"
           } w-[240px] ${menuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         >
-          <div className="h-16 px-4 border-b border-[#1E293B] flex items-center justify-between gap-2">
+          <div className="h-16 px-4 border-b border-[var(--border)] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="h-8 w-8 rounded-[8px] bg-[#0284C7] border border-[#38BDF8]/40 text-white flex items-center justify-center shrink-0">
                 <Activity size={17} strokeWidth={1.75} />
               </div>
               {!sidebarCollapsed && (
                 <div className="truncate">
-                  <div className="text-[14px] font-semibold text-[#F8FAFC] leading-tight">
+                  <div className="text-[14px] font-semibold text-[var(--text)] leading-tight">
                     AutoGuard AI
                   </div>
-                  <div className="text-[11px] text-[#94A3B8]">Acoustic diagnostics</div>
+                  <div className="text-[11px] text-[var(--text-muted)]">3D Acoustic Lab</div>
                 </div>
               )}
             </div>
@@ -249,7 +276,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setSidebarCollapsed((c) => !c)}
-              className="hidden lg:inline-flex p-1.5 rounded-[8px] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors"
+              className="hidden lg:inline-flex p-1.5 rounded-[8px] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-subtle)] transition-colors"
               aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {sidebarCollapsed ? (
@@ -262,7 +289,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
-              className="lg:hidden p-1.5 rounded-[8px] text-[#94A3B8] hover:text-[#F8FAFC]"
+              className="lg:hidden p-1.5 rounded-[8px] text-[var(--text-muted)] hover:text-[var(--text)]"
               aria-label="Close sidebar"
             >
               <X size={18} strokeWidth={1.5} />
@@ -284,7 +311,7 @@ export default function App() {
                   } py-2 rounded-[8px] gap-3 text-[13px] font-medium transition-colors duration-150 ${
                     active
                       ? "bg-[#0EA5E9]/15 text-[#38BDF8] border border-[#38BDF8]/30"
-                      : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]/60 border border-transparent"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-subtle)] border border-transparent"
                   }`}
                 >
                   <Icon size={17} strokeWidth={1.5} className="shrink-0" />
@@ -295,11 +322,11 @@ export default function App() {
           </nav>
 
           {/* Minimal Service Status */}
-          <div className="p-3 border-t border-[#1E293B]">
+          <div className="p-3 border-t border-[var(--border)]">
             <div
               className={`flex items-center ${
                 sidebarCollapsed ? "justify-center" : "px-3"
-              } py-1.5 gap-2.5 text-[12px] text-[#94A3B8]`}
+              } py-1.5 gap-2.5 text-[12px] text-[var(--text-muted)]`}
             >
               <span
                 className={`h-2 w-2 rounded-full shrink-0 ${
@@ -319,41 +346,71 @@ export default function App() {
             sidebarCollapsed ? "lg:pl-[72px]" : "lg:pl-[240px]"
           }`}
         >
-          {/* Clean Top Bar */}
-          <header className="sticky top-0 z-20 h-16 bg-[#0D1320]/90 backdrop-blur-md border-b border-[#1E293B] px-4 sm:px-8 flex items-center justify-between gap-4 no-print">
+          {/* Top Bar with Theme Switcher & Search */}
+          <header
+            className="sticky top-0 z-20 h-16 backdrop-blur-md border-b border-[var(--border)] px-4 sm:px-8 flex items-center justify-between gap-4 no-print"
+            style={{ backgroundColor: "var(--header-bg)" }}
+          >
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="lg:hidden p-1.5 rounded-[8px] border border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC]"
+                className="lg:hidden p-1.5 rounded-[8px] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]"
                 aria-label="Open navigation menu"
               >
                 <Menu size={18} strokeWidth={1.5} />
               </button>
 
               <div className="flex items-center gap-2 text-[13px] min-w-0">
-                <span className="hidden sm:inline text-[#94A3B8]">AutoGuard AI</span>
-                <ChevronRight size={14} strokeWidth={1.5} className="hidden sm:inline text-[#475569]" />
-                <h1 className="text-[14px] font-semibold text-[#F8FAFC] truncate">
+                <span className="hidden sm:inline text-[var(--text-muted)]">AutoGuard AI</span>
+                <ChevronRight
+                  size={14}
+                  strokeWidth={1.5}
+                  className="hidden sm:inline text-[var(--text-muted)]"
+                />
+                <h1 className="text-[14px] font-semibold text-[var(--text)] truncate">
                   {currentNav?.label}
                 </h1>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setPaletteOpen(true)}
-              className="inline-flex items-center gap-2.5 h-9 px-3 rounded-[8px] border border-[#1E293B] bg-[#111827] hover:border-[#334155] text-[13px] text-[#94A3B8] transition-colors"
-            >
-              <Search size={14} strokeWidth={1.5} />
-              <span className="hidden sm:inline">Search</span>
-              <kbd className="font-mono-data text-[11px] bg-[#090D16] border border-[#1E293B] rounded-[4px] px-1.5 py-0.5 text-[#94A3B8]">
-                ⌘K
-              </kbd>
-            </button>
+            <div className="flex items-center gap-2.5">
+              {/* Luxury Dark / Luxury Light Theme Toggle */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="inline-flex items-center gap-2 h-9 px-3 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-strong)] text-[13px] text-[var(--text)] transition-colors"
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+                title={`Current: Luxury ${theme === "dark" ? "Dark" : "Light"} Theme`}
+              >
+                {theme === "dark" ? (
+                  <>
+                    <Moon size={14} strokeWidth={1.5} className="text-[#38BDF8]" />
+                    <span className="hidden sm:inline">Luxury Dark</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun size={14} strokeWidth={1.5} className="text-[#D97706]" />
+                    <span className="hidden sm:inline">Luxury Light</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaletteOpen(true)}
+                className="inline-flex items-center gap-2.5 h-9 px-3 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-strong)] text-[13px] text-[var(--text-muted)] transition-colors"
+              >
+                <Search size={14} strokeWidth={1.5} />
+                <span className="hidden sm:inline">Search</span>
+                <kbd className="font-mono-data text-[11px] bg-[var(--surface-subtle)] border border-[var(--border)] rounded-[4px] px-1.5 py-0.5 text-[var(--text-muted)]">
+                  ⌘K
+                </kbd>
+              </button>
+            </div>
           </header>
 
-          <div className="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-8 py-8">
+          <div className="flex-1 max-w-[1320px] w-full mx-auto px-4 sm:px-8 py-8">
             {backendError && page !== "dashboard" && (
               <div className="mb-6 rounded-[12px] border border-[#EF4444]/40 bg-[#EF4444]/10 px-4 py-3 text-[13px] text-[#F87171] flex items-center justify-between gap-3">
                 <span>{backendError}</span>
@@ -388,6 +445,21 @@ export default function App() {
                     onInspectRecord={handleInspectRecord}
                     onQuickTestSample={handleQuickTestSample}
                   />
+                )}
+
+                {page === "engine_lab" && (
+                  <Suspense fallback={<Skeleton className="h-[640px] w-full rounded-[12px]" />}>
+                    <LazyEngineLabPage
+                      activeReport={activeReport}
+                      samples={samples}
+                      onReportUpdated={(report, f) => {
+                        setActiveReport(report);
+                        setActiveFile(f);
+                        refreshBackendData();
+                      }}
+                      onNavigate={navigate}
+                    />
+                  </Suspense>
                 )}
 
                 {page === "diagnosis" && (
@@ -436,6 +508,8 @@ export default function App() {
           onNavigate={navigate}
           recentScans={records}
           onInspectRecord={handleInspectRecord}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       </div>
     </MotionConfig>

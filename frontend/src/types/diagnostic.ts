@@ -3,7 +3,8 @@ export type CoreCondition = "healthy" | "engine_knock" | "misfire";
 export type ConfidenceTier = "high" | "moderate" | "low" | "unsupported";
 export type InferenceMode = "dual" | "cnn" | "svm";
 export type SpectrogramColormap = "thermal" | "cyan" | "viridis";
-export type AppPage = "dashboard" | "diagnosis" | "results" | "history" | "telemetry";
+export type ThemeMode = "dark" | "light";
+export type AppPage = "dashboard" | "engine_lab" | "diagnosis" | "results" | "history" | "telemetry";
 
 export interface ClassScores {
   engine_knock: number;
@@ -330,4 +331,5 @@ export interface AppSettings {
   colormap: SpectrogramColormap;
   playbackRate: number;
   autoSaveCnn: boolean;
+  theme?: ThemeMode;
 }
