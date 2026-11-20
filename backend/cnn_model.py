@@ -238,6 +238,11 @@ def predict_with_cnn(audio_bytes: bytes, filename: str) -> dict:
                 f"Audio is too short ({duration_sec:.2f}s). "
                 "Please upload at least 0.5 seconds of engine audio."
             )
+        if duration_sec > 180.0:
+            raise ValueError(
+                f"Audio is too long ({duration_sec:.1f}s). "
+                "Maximum supported clip length is 180 seconds for low-memory inference."
+            )
 
         # ── 3. Extract 16 384-dim log-mel features (windowed if > MAX_DURATION) ─
         try:

@@ -54,6 +54,10 @@ class AnalysisResult(BaseModel):
     uncertain_reason:        Optional[str] = None
     model_prediction:        Optional[str] = None   # actual model vote before abstain
     disagree_std:            float         = 0.0
+    status:                  str           = "likely_detected"  # likely_detected | possible_indication | healthy_consistent | inconclusive
+    recommendation:          Optional[str] = None
+    score_calibration:       str           = "uncalibrated_consensus_score"
+    model_used:              str           = "AutoGuard Consensus (V1 CNN + SVM)"
     # Repair Recommendation System fields
     confidence_tier:         str           = "high"
     uncertainty_warning:     Optional[str] = None
@@ -137,6 +141,9 @@ class DiagnoseResult(BaseModel):
     created_at:              Optional[str]        = None
     uncertain:               bool                 = False
     uncertain_reason:        Optional[str]        = None
+    status:                  str                  = "likely_detected"
+    recommendation:          Optional[str]        = None
+    score_calibration:       str                  = "uncalibrated_cnn_softmax"
     confidence_tier:         str                  = "high"
     uncertainty_warning:     Optional[str]        = None
     diagnosis_overview:      list[str]            = []

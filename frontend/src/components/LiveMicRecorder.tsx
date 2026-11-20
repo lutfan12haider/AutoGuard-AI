@@ -57,10 +57,10 @@ export function LiveMicRecorder({
 
       const w = canvas.width;
       const h = canvas.height;
-      ctx.fillStyle = "#090D16";
+      ctx.fillStyle = "#F8FAF9";
       ctx.fillRect(0, 0, w, h);
 
-      ctx.strokeStyle = "#1E293B";
+      ctx.strokeStyle = "#E2E8E4";
       ctx.lineWidth = 1;
       for (const f of [0.25, 0.5, 0.75]) {
         ctx.beginPath();
@@ -69,7 +69,7 @@ export function LiveMicRecorder({
         ctx.stroke();
       }
 
-      ctx.strokeStyle = "#38BDF8";
+      ctx.strokeStyle = "#16A34A";
       ctx.lineWidth = 2;
       ctx.beginPath();
       const step = Math.max(1, Math.floor(timeData.length / w));
@@ -168,10 +168,10 @@ export function LiveMicRecorder({
           </Badge>
           {recording && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[12px] text-[#94A3B8]">Level</span>
-              <div className="w-20 h-1.5 rounded-full bg-[#1E293B] overflow-hidden">
+              <span className="text-[12px] text-[#5C6B62]">Level</span>
+              <div className="w-20 h-1.5 rounded-full bg-[#E2E8E4] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-[#38BDF8] transition-all duration-75"
+                  className="h-full rounded-full bg-[#16A34A] transition-all duration-75"
                   style={{ width: `${levelPct}%` }}
                 />
               </div>
@@ -179,7 +179,7 @@ export function LiveMicRecorder({
           )}
         </div>
 
-        <span className="font-mono-data text-[13px] font-medium text-[#F8FAFC]">
+        <span className="font-mono-data text-[13px] font-medium text-[#17211B]">
           {elapsedSec.toFixed(1)}s
         </span>
       </div>
@@ -188,18 +188,18 @@ export function LiveMicRecorder({
         ref={canvasRef}
         width={680}
         height={132}
-        className="w-full h-[132px] rounded-[8px] bg-[#090D16] border border-[#1E293B]"
+        className="w-full h-[132px] rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4]"
       />
 
       {error && (
-        <div className="rounded-[8px] border border-[#EF4444]/40 bg-[#EF4444]/10 px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#F87171]">
+        <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2] px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#B91C1C]">
           <AlertCircle size={16} strokeWidth={1.5} />
           <span>{error}</span>
         </div>
       )}
 
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <span className="text-[13px] text-[#94A3B8]">
+        <span className="text-[13px] text-[#5C6B62]">
           Record 10–15 seconds while the engine is idling.
         </span>
 

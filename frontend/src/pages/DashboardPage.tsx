@@ -22,7 +22,13 @@ import type {
 import { formatDuration, formatTimestamp, predictionToLabel } from "../services/api";
 import { ConfidenceGauge, StatusBadge } from "../components/StatusBadge";
 import { SparklineChart } from "../components/TelemetryCharts";
-import { Badge, Button, Card, EmptyState, Skeleton, Stat } from "../components/ui";
+import { Badge, Button, Card, EmptyState, Skeleton, Stat, Tabs } from "../components/ui";
+
+const LazyVehicleDiagnosticScene3D = lazy(() =>
+  import("../components/VehicleDiagnosticScene3D").then((m) => ({
+    default: m.VehicleDiagnosticScene3D,
+  }))
+);
 
 const LazyEngineLab3D = lazy(() =>
   import("../components/EngineLab3D").then((m) => ({ default: m.EngineLab3D }))
@@ -73,6 +79,7 @@ export function DashboardPage({
   onQuickTestSample: (sample: SampleAudioItem) => void;
 }) {
   const [selectedHotspot, setSelectedHotspot] = useState(VEHICLE_HOTSPOTS[0]);
+  const [bayView, setBayView] = useState<"vehicle" | "cutaway">("vehicle");
 
   const total = stats?.total_scans ?? 0;
   const healthy = stats?.healthy_results ?? 0;
@@ -99,57 +106,60 @@ export function DashboardPage({
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-[12px] border border-[#EF4444]/40 bg-[#EF4444]/10 px-4 py-3 flex items-center gap-3 text-[13px] text-[#F87171]">
+        <div className="rounded-[12px] border border-[#FECACA] bg-[#FEE2E2] px-4 py-3 flex items-center gap-3 text-[13px] text-[#B91C1C]">
           <WifiOff size={16} strokeWidth={1.5} className="shrink-0" />
           <span>Service offline — make sure the local diagnostic server is running.</span>
         </div>
       )}
 
-      {/* ── Luxury Automotive Vehicle Hero Banner (Reference 3 Inspired) ─────── */}
-      <Card className="overflow-hidden">
+      {/* ── Automotive Powertrain Diagnostic Header Banner (Emerald Theme) ── */}
+      <div className="rounded-[12px] overflow-hidden border border-[#1E5D3C] bg-gradient-to-br from-[#0D4127] via-[#0B3821] to-[#082A19] shadow-[0_12px_36px_rgba(2,18,10,0.38)]">
         <div className="grid grid-cols-1 xl:grid-cols-12">
-          {/* Left: Luxury Diagnostic Command Copy & Telemetry Indicators */}
-          <div className="xl:col-span-5 p-6 lg:p-8 flex flex-col justify-between gap-6 border-b xl:border-b-0 xl:border-r border-[var(--border)]">
+          {/* Left: Diagnostic Command Copy & Telemetry Indicators */}
+          <div className="xl:col-span-5 p-6 lg:p-8 flex flex-col justify-between gap-6 border-b xl:border-b-0 xl:border-r border-[#1C5B3A]">
             <div className="space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge tone="accent" dot>
-                  AutoGuard AI · Acoustic Studio
-                </Badge>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#22C55E]/40 bg-[#144E30] px-2.5 py-0.5 text-[12px] font-medium text-[#86EFAC]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
+                  AutoGuard AI · Diagnostic Bay
+                </span>
                 {latestScan && <StatusBadge prediction={latestScan.prediction} shortLabel />}
               </div>
 
               <div>
-                <h2 className="text-[28px] sm:text-[32px] font-semibold text-[var(--text)] leading-tight">
-                  Acoustic Powertrain & 3D Engine Failure Lab
+                <h2 className="text-[28px] sm:text-[32px] font-semibold text-white leading-tight">
+                  AutoGuard AI &amp; 3D Diagnostic Lab
                 </h2>
-                <p className="text-[14px] text-[var(--text-muted)] mt-2 leading-relaxed">
-                  Analyze engine sound across our three ML categories (<strong>Healthy</strong>,{" "}
-                  <strong>Misfire</strong>, <strong>Engine Knocking</strong>) and inspect affected components in the interactive 3D GLB cutaway engine.
+                <p className="text-[14px] text-[#CBE2D4] mt-2 leading-relaxed">
+                  Analyze engine sound across three ML categories (
+                  <strong className="text-white">Healthy</strong>,{" "}
+                  <strong className="text-white">Engine Knocking</strong>,{" "}
+                  <strong className="text-white">Misfire</strong>) and inspect affected engine zones inside a live 2023 Toyota Corolla &amp; cutaway powertrain.
                 </p>
               </div>
 
               {/* Selected Vehicle Hotspot Readout */}
-              <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5 space-y-1">
+              <div className="rounded-[10px] border border-[#22C55E]/55 bg-[#0F492C]/80 p-3.5 space-y-1">
                 <div className="flex items-center justify-between text-[12px]">
-                  <span className="font-semibold text-[#38BDF8] flex items-center gap-1.5">
+                  <span className="font-semibold text-[#86EFAC] flex items-center gap-1.5">
                     <Cpu size={14} />
                     {selectedHotspot.title}
                   </span>
-                  <span className="font-mono-data text-[11px] text-[var(--text-muted)]">
+                  <span className="font-mono-data text-[11px] text-[#4ADE80] font-semibold">
                     ACTIVE ZONE
                   </span>
                 </div>
-                <p className="text-[12px] text-[var(--text-muted)]">{selectedHotspot.detail}</p>
+                <p className="text-[12px] text-[#D7ECE0]">{selectedHotspot.detail}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="button" size="lg" onClick={() => onNavigate("diagnosis")}>
-                <Plus size={15} strokeWidth={1.5} /> Check engine audio
+              <Button type="button" variant="white" size="lg" onClick={() => onNavigate("diagnosis")}>
+                <Plus size={15} strokeWidth={1.75} /> Check engine audio
               </Button>
               <Button
                 type="button"
-                variant="secondary"
+                variant="emeraldOutline"
                 size="lg"
                 onClick={() => onNavigate("engine_lab")}
               >
@@ -158,15 +168,15 @@ export function DashboardPage({
             </div>
           </div>
 
-          {/* Right: Realistic Luxury Sedan Photography with Interactive Telemetry Pins */}
-          <div className="xl:col-span-7 relative min-h-[300px] sm:min-h-[360px] bg-[#070A12] overflow-hidden flex items-end">
+          {/* Right: Vehicle Diagnostic Showcase with Floating White Telemetry Pills */}
+          <div className="xl:col-span-7 relative min-h-[300px] sm:min-h-[360px] bg-[#062415] overflow-hidden flex items-end">
             <img
               src="/images/hero-luxury-sedan.jpg"
-              alt="Luxury performance sedan in acoustic diagnostic bay"
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              alt="Sedan in acoustic automotive diagnostic bay"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#070A12]/80 via-transparent to-[#070A12]/70" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070A12]/90 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0B3821]/85 via-[#072617]/25 to-[#062314]/70" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#062415]/90 via-transparent to-transparent" />
 
             {/* Interactive Telemetry Callout Hotspots on the Vehicle */}
             {VEHICLE_HOTSPOTS.map((spot) => {
@@ -183,8 +193,8 @@ export function DashboardPage({
                   <span
                     className={`h-7 w-7 rounded-full flex items-center justify-center border transition-transform ${
                       active
-                        ? "bg-[#38BDF8] border-white text-[#070A12] scale-110 shadow-[0_0_20px_rgba(56,189,248,0.8)]"
-                        : "bg-[#070A12]/80 border-[#38BDF8] text-[#38BDF8] hover:scale-110"
+                        ? "bg-[#16A34A] border-white text-white scale-110 shadow-[0_0_16px_rgba(34,197,94,0.85)]"
+                        : "bg-white/95 border-[#16A34A] text-[#16A34A] hover:scale-110"
                     }`}
                   >
                     <span className="h-2 w-2 rounded-full bg-current" />
@@ -193,74 +203,100 @@ export function DashboardPage({
               );
             })}
 
-            {/* Bottom Overlay Telemetry Bar inside Vehicle Bay */}
+            {/* Bottom Overlay Floating White Telemetry Cards */}
             <div className="relative z-10 w-full p-4 sm:p-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div className="rounded-[10px] bg-[#070A12]/85 border border-[#1E293B] backdrop-blur-md px-4 py-3 space-y-1 max-w-sm">
-                <div className="text-[11px] font-mono-data text-[#38BDF8] uppercase">
+              <div className="rounded-[10px] bg-white border border-[#D8E5DD] px-4 py-3 space-y-1 max-w-sm shadow-lg">
+                <div className="text-[11px] font-mono-data text-[#16A34A] font-semibold uppercase">
                   POWERTRAIN TELEMETRY · 2.0L DOHC I4
                 </div>
-                <div className="text-[14px] font-semibold text-white">
+                <div className="text-[14px] font-semibold text-[#14221B]">
                   {latestScan
                     ? `Latest Scan: ${predictionToLabel(latestScan.prediction)} (${Math.round(
                         latestScan.confidence * 100
                       )}%)`
                     : "Ready for Acoustic Engine Screening"}
                 </div>
-                <div className="text-[12px] text-[#94A3B8]">
-                  Click the glowing pins on the vehicle or open the 3D Engine Lab below.
+                <div className="text-[12px] text-[#5C6B62]">
+                  Upload or record engine sound to run the 3D Toyota Corolla inspection sequence.
                 </div>
               </div>
 
-              <div className="rounded-[10px] bg-[#070A12]/85 border border-[#1E293B] backdrop-blur-md px-4 py-3 flex items-center gap-3">
+              <div className="rounded-[10px] bg-white border border-[#D8E5DD] px-4 py-3 flex items-center gap-3 shadow-lg">
                 <div>
-                  <div className="font-mono-data text-[22px] font-semibold text-[#4ADE80] leading-none">
+                  <div className="font-mono-data text-[22px] font-semibold text-[#16A34A] leading-none">
                     {healthyPct}%
                   </div>
-                  <div className="text-[11px] text-[#94A3B8] mt-1">Healthy Rate</div>
+                  <div className="text-[11px] text-[#5C6B62] mt-1">Healthy Rate</div>
                 </div>
-                <div className="h-8 w-px bg-[#1E293B]" />
+                <div className="h-8 w-px bg-[#D8E5DD]" />
                 <div>
-                  <div className="font-mono-data text-[22px] font-semibold text-white leading-none">
+                  <div className="font-mono-data text-[22px] font-semibold text-[#14221B] leading-none">
                     {total}
                   </div>
-                  <div className="text-[11px] text-[#94A3B8] mt-1">Total Scans</div>
+                  <div className="text-[11px] text-[#5C6B62] mt-1">Total Scans</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* ── Interactive 3D Engine Cutaway Lab Section on Overview ───────────── */}
+      {/* ── Interactive 3D Corolla & Engine Bay Section on Overview ───────────── */}
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="text-[18px] font-semibold text-[var(--text)] flex items-center gap-2">
-              <Sparkles size={17} className="text-[#38BDF8]" />
-              <span>Interactive 3D Engine Failure Lab</span>
+            <h3 className="text-[18px] font-semibold text-white flex items-center gap-2">
+              <Sparkles size={17} className="text-[#4ADE80]" />
+              <span>Interactive 3D Vehicle &amp; Engine Diagnostic Bay</span>
             </h3>
-            <p className="text-[13px] text-[var(--text-muted)]">
-              Rotate, zoom, explode, and click any 3D component. Currently synced to{" "}
-              <strong>{latestScan ? predictionToLabel(latestScan.prediction) : "Healthy"}</strong>.
+            <p className="text-[13px] text-[#C0DCCB]">
+              Inspect the 2023 Toyota Corolla bay &amp; 3D powertrain synced to{" "}
+              <strong className="text-white">
+                {latestScan ? predictionToLabel(latestScan.prediction) : "Healthy"}
+              </strong>.
             </p>
           </div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => onNavigate("engine_lab")}
-          >
-            Expand full 3D Engine Lab <ArrowRight size={14} strokeWidth={1.5} />
-          </Button>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Tabs
+              surface="emerald"
+              value={bayView}
+              onChange={setBayView}
+              layoutId="dashboard-bay-tab"
+              items={[
+                { id: "vehicle", label: "Corolla Bay" },
+                { id: "cutaway", label: "Cutaway Engine" },
+              ]}
+            />
+            <Button
+              type="button"
+              variant="emeraldOutline"
+              size="sm"
+              onClick={() => onNavigate("engine_lab")}
+            >
+              Expand full 3D Engine Lab <ArrowRight size={14} strokeWidth={1.5} />
+            </Button>
+          </div>
         </div>
 
         <Suspense fallback={<Skeleton className="h-[460px] w-full rounded-[12px]" />}>
-          <LazyEngineLab3D
-            condition={latestScan ? latestScan.prediction : "healthy"}
-            confidence={latestScan ? latestScan.confidence : 0.85}
-            confidenceTier={latestScan?.confidence_tier ?? "high"}
-            compact
-          />
+          {bayView === "vehicle" ? (
+            <LazyVehicleDiagnosticScene3D
+              condition={latestScan ? latestScan.prediction : "healthy"}
+              confidence={latestScan ? latestScan.confidence : 0.85}
+              confidenceTier={latestScan?.confidence_tier ?? "high"}
+              sequenceKey={latestScan?.id ?? "overview"}
+              autoPlay={false}
+              compact
+              onInspectSubsystem={() => setBayView("cutaway")}
+            />
+          ) : (
+            <LazyEngineLab3D
+              condition={latestScan ? latestScan.prediction : "healthy"}
+              confidence={latestScan ? latestScan.confidence : 0.85}
+              confidenceTier={latestScan?.confidence_tier ?? "high"}
+              compact
+            />
+          )}
         </Suspense>
       </div>
 
@@ -277,13 +313,13 @@ export function DashboardPage({
           label="Healthy results"
           value={loading ? <Skeleton className="h-7 w-16" /> : `${healthyPct}%`}
           subtext={`${healthy} healthy recordings`}
-          icon={<CheckCircle2 size={16} strokeWidth={1.5} className="text-[#4ADE80]" />}
+          icon={<CheckCircle2 size={16} strokeWidth={1.5} className="text-[#16A34A]" />}
         />
         <Stat
           label="Fault patterns found"
           value={loading ? <Skeleton className="h-7 w-16" /> : faults.toLocaleString()}
           subtext={`${knock} knocking · ${misfire} misfire`}
-          icon={<AlertTriangle size={16} strokeWidth={1.5} className="text-[#FBBF24]" />}
+          icon={<AlertTriangle size={16} strokeWidth={1.5} className="text-[#EA580C]" />}
         />
       </div>
 
@@ -325,9 +361,9 @@ export function DashboardPage({
 
               <div className="w-full sm:w-48 space-y-3.5">
                 {[
-                  { label: "Healthy", pct: healthyPct, bar: "bg-[#22C55E]" },
-                  { label: "Engine Knocking", pct: knockPct, bar: "bg-[#F59E0B]" },
-                  { label: "Misfire", pct: misfirePct, bar: "bg-[#EF4444]" },
+                  { label: "Healthy", pct: healthyPct, bar: "bg-[#16A34A]" },
+                  { label: "Engine Knocking", pct: knockPct, bar: "bg-[#DC2626]" },
+                  { label: "Misfire", pct: misfirePct, bar: "bg-[#EA580C]" },
                 ].map((item) => (
                   <div key={item.label} className="space-y-1">
                     <div className="flex items-center justify-between text-[13px]">
@@ -425,7 +461,7 @@ export function DashboardPage({
                 key={s.id}
                 type="button"
                 onClick={() => onQuickTestSample(s)}
-                className="rounded-[10px] border border-[var(--border)] hover:border-[#38BDF8] bg-[var(--surface-subtle)] p-4 text-left transition-all flex items-center justify-between gap-3"
+                className="rounded-[10px] border border-[var(--border)] hover:border-[#16A34A] bg-[var(--surface-subtle)] p-4 text-left transition-all flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
                   <div className="text-[14px] font-semibold text-[var(--text)]">
@@ -435,7 +471,7 @@ export function DashboardPage({
                     Sample clip · {s.size_kb} KB
                   </div>
                 </div>
-                <span className="h-8 w-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[#38BDF8] shrink-0">
+                <span className="h-8 w-8 rounded-full bg-white border border-[var(--border)] flex items-center justify-center text-[#16A34A] shrink-0">
                   <Play size={13} strokeWidth={1.5} className="ml-0.5" />
                 </span>
               </button>

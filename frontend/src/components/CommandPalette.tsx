@@ -113,7 +113,7 @@ export function CommandPalette({
                   }}
                   className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[var(--surface-subtle)] text-left transition-colors"
                 >
-                  <Icon size={16} strokeWidth={1.5} className="text-[#38BDF8] shrink-0" />
+                  <Icon size={16} strokeWidth={1.5} className="text-[#16A34A] shrink-0" />
                   <span className="flex-1 text-[13px] font-medium text-[var(--text)] truncate">
                     {item.label}
                   </span>

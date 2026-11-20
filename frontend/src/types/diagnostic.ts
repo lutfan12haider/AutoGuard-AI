@@ -55,6 +55,10 @@ export interface AnalysisResult {
   uncertain_reason?: string | null;
   model_prediction?: CoreCondition | null;
   disagree_std: number;
+  status?: string;
+  recommendation?: string | null;
+  score_calibration?: string;
+  model_used?: string;
   confidence_tier?: ConfidenceTier;
   uncertainty_warning?: string | null;
   diagnosis_overview?: string[];
@@ -79,6 +83,9 @@ export interface DiagnoseResult {
   created_at?: string | null;
   uncertain?: boolean;
   uncertain_reason?: string | null;
+  status?: string;
+  recommendation?: string | null;
+  score_calibration?: string;
   confidence_tier?: ConfidenceTier;
   uncertainty_warning?: string | null;
   diagnosis_overview?: string[];
@@ -106,6 +113,10 @@ export interface UnifiedDiagnosticReport {
   uncertain_reason?: string | null;
   model_prediction?: CoreCondition | null;
   disagree_std: number;
+  status?: string;
+  recommendation?: string | null;
+  score_calibration?: string;
+  model_used?: string;
   window_count: number;
   windows: WindowResult[];
   models_agree?: boolean;

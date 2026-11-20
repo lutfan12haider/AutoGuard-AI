@@ -45,7 +45,7 @@ export function TelemetryPage() {
 
   if (error || !data) {
     return (
-      <Card className="p-8 text-center text-[14px] text-[#F87171]">
+      <Card className="p-8 text-center text-[14px] text-[#DC2626]">
         {error || "Model telemetry is unavailable."}
       </Card>
     );
@@ -65,8 +65,8 @@ export function TelemetryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[28px] font-semibold text-[#F8FAFC] leading-tight">Model telemetry</h2>
-        <p className="text-[14px] text-[#94A3B8] mt-1">
+        <h2 className="text-[28px] font-semibold text-white leading-tight">Model telemetry</h2>
+        <p className="text-[14px] text-[#C0DCCB] mt-1">
           Evaluation metrics, training progression, and stratified validation benchmarks.
         </p>
       </div>
@@ -99,8 +99,8 @@ export function TelemetryPage() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <Card className="xl:col-span-7 p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <Cpu size={17} strokeWidth={1.5} className="text-[#38BDF8]" />
-            <h3 className="text-[16px] font-semibold text-[#F8FAFC]">
+            <Cpu size={17} strokeWidth={1.5} className="text-[#16A34A]" />
+            <h3 className="text-[16px] font-semibold text-[#17211B]">
               AutoGuardCNN training curve
             </h3>
           </div>
@@ -109,16 +109,16 @@ export function TelemetryPage() {
 
         <Card className="xl:col-span-5 p-6 space-y-4">
           <div>
-            <h3 className="text-[16px] font-semibold text-[#F8FAFC]">Pipeline specifications</h3>
-            <p className="text-[13px] text-[#94A3B8] mt-0.5">
+            <h3 className="text-[16px] font-semibold text-[#17211B]">Pipeline specifications</h3>
+            <p className="text-[13px] text-[#526058] mt-0.5">
               Identical preprocessing shared between training and inference.
             </p>
           </div>
 
           <div className="space-y-3 text-[13px]">
-            <div className="rounded-[8px] border border-[#1E293B] bg-[#090D16] p-4">
-              <div className="font-semibold text-[#F8FAFC]">AutoGuardCNN (v3)</div>
-              <div className="grid grid-cols-2 gap-y-1.5 font-mono-data text-[12px] text-[#94A3B8] mt-2">
+            <div className="rounded-[8px] border border-[#E2E8E4] bg-[#F8FAF9] p-4">
+              <div className="font-semibold text-[#17211B]">AutoGuardCNN (v3)</div>
+              <div className="grid grid-cols-2 gap-y-1.5 font-mono-data text-[12px] text-[#526058] mt-2">
                 <span>Features: {data.feature_config?.feature_dim?.toLocaleString() ?? "16,384"}</span>
                 <span>Shape: {data.feature_config?.n_mels}×{data.feature_config?.n_frames}</span>
                 <span>Sample rate: {data.feature_config?.target_sr} Hz</span>
@@ -126,9 +126,9 @@ export function TelemetryPage() {
               </div>
             </div>
 
-            <div className="rounded-[8px] border border-[#1E293B] bg-[#090D16] p-4">
-              <div className="font-semibold text-[#F8FAFC]">Acoustic SVM (v2)</div>
-              <div className="grid grid-cols-2 gap-y-1.5 font-mono-data text-[12px] text-[#94A3B8] mt-2">
+            <div className="rounded-[8px] border border-[#E2E8E4] bg-[#F8FAF9] p-4">
+              <div className="font-semibold text-[#17211B]">Acoustic SVM (v2)</div>
+              <div className="grid grid-cols-2 gap-y-1.5 font-mono-data text-[12px] text-[#526058] mt-2">
                 <span>Features: {svm?.feature_config.feature_dim ?? 288}</span>
                 <span>Pooling: mean + std</span>
                 <span>MFCC + Δ + Δ²: 240</span>
@@ -168,10 +168,10 @@ export function TelemetryPage() {
       {/* 30-Clip Evaluation Table */}
       {eval30 && (
         <Card className="overflow-hidden">
-          <div className="p-5 border-b border-[#1E293B] flex items-center justify-between flex-wrap gap-3">
+          <div className="p-5 border-b border-[#E2E8E4] flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h3 className="text-[16px] font-semibold text-[#F8FAFC]">30-clip stratified audit</h3>
-              <p className="text-[13px] text-[#94A3B8] mt-0.5">
+              <h3 className="text-[16px] font-semibold text-[#17211B]">30-clip stratified audit</h3>
+              <p className="text-[13px] text-[#526058] mt-0.5">
                 Per-clip prediction results from held-out evaluation.
               </p>
             </div>
@@ -203,25 +203,25 @@ export function TelemetryPage() {
                   <TableRow key={c.filename}>
                     <td className="py-3 px-4">
                       {c.correct ? (
-                        <CheckCircle2 size={16} strokeWidth={1.5} className="text-[#4ADE80]" />
+                        <CheckCircle2 size={16} strokeWidth={1.5} className="text-[#16A34A]" />
                       ) : (
-                        <XCircle size={16} strokeWidth={1.5} className="text-[#F87171]" />
+                        <XCircle size={16} strokeWidth={1.5} className="text-[#DC2626]" />
                       )}
                     </td>
-                    <td className="py-3 px-4 font-mono-data text-[13px] text-[#F8FAFC]">
+                    <td className="py-3 px-4 font-mono-data text-[13px] text-[#17211B]">
                       {c.filename}
                     </td>
-                    <td className="py-3 px-4 text-[13px] text-[#94A3B8]">
+                    <td className="py-3 px-4 text-[13px] text-[#526058]">
                       {predictionToLabel(c.true)}
                     </td>
                     <td
                       className={`py-3 px-4 text-[13px] font-medium ${
-                        c.correct ? "text-[#4ADE80]" : "text-[#F87171]"
+                        c.correct ? "text-[#16A34A]" : "text-[#DC2626]"
                       }`}
                     >
                       {predictionToLabel(c.predicted)}
                     </td>
-                    <td className="py-3 px-4 font-mono-data text-[13px] text-[#F8FAFC]">
+                    <td className="py-3 px-4 font-mono-data text-[13px] text-[#17211B]">
                       {(c.confidence * 100).toFixed(1)}%
                     </td>
                   </TableRow>

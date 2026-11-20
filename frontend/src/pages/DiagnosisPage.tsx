@@ -32,6 +32,7 @@ export function DiagnosisPage({
   preloadedSource,
   preloadedExpected,
   onClearPreload,
+  onClearBackendError,
   onRunDiagnosis,
 }: {
   defaultMode: InferenceMode;
@@ -41,6 +42,7 @@ export function DiagnosisPage({
   preloadedSource?: "upload" | "mic" | "sample";
   preloadedExpected?: string;
   onClearPreload: () => void;
+  onClearBackendError?: () => void;
   onRunDiagnosis: (
     file: File,
     mode: InferenceMode,
@@ -88,6 +90,7 @@ export function DiagnosisPage({
     }
 
     setError("");
+    onClearBackendError?.();
     setFile(candidate);
     setSource(src);
     setExpectedClass(expected);
@@ -142,17 +145,18 @@ export function DiagnosisPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[var(--text)] leading-tight">
+          <h2 className="text-[28px] font-semibold text-white leading-tight">
             Check your engine
           </h2>
-          <p className="text-[14px] text-[var(--text-muted)] mt-1">
-            Upload or record an engine clip to classify Healthy, Misfire, or Engine Knocking and inspect 3D components.
+          <p className="text-[14px] text-[#C0DCCB] mt-1">
+            Upload or record an engine clip to classify Healthy, Misfire, or Engine Knocking and trigger the 3D Toyota Corolla inspection sequence.
           </p>
         </div>
 
-        <Badge tone="healthy" dot>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#22C55E]/40 bg-[#0D4A2B] px-3 py-1 text-[12px] font-medium text-[#86EFAC]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
           Private · Runs locally
-        </Badge>
+        </span>
       </div>
 
       <Stepper steps={["Add audio", "Review", "Results"]} activeStep={currentStep} />
@@ -183,6 +187,8 @@ export function DiagnosisPage({
                     setMetrics(null);
                     setError("");
                     setExpectedClass(undefined);
+                    onClearBackendError?.();
+                    if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
                 >
                   <Trash2 size={14} strokeWidth={1.5} /> Remove
@@ -255,7 +261,7 @@ export function DiagnosisPage({
                               type="button"
                               disabled={loadingSampleId === s.id}
                               onClick={() => handleSelectSample(s)}
-                              className="rounded-[10px] border border-[var(--border)] hover:border-[#38BDF8] bg-[var(--surface-subtle)] p-4 text-left transition-all flex items-center justify-between gap-3"
+                              className="rounded-[10px] border border-[var(--border)] hover:border-[#16A34A] bg-[var(--surface-subtle)] p-4 text-left transition-all flex items-center justify-between gap-3"
                             >
                               <div className="min-w-0">
                                 <div className="text-[14px] font-semibold text-[var(--text)]">
@@ -265,7 +271,7 @@ export function DiagnosisPage({
                                   {s.filename}
                                 </div>
                               </div>
-                              <span className="shrink-0 h-8 w-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[#38BDF8]">
+                              <span className="shrink-0 h-8 w-8 rounded-full bg-white border border-[var(--border)] flex items-center justify-center text-[#16A34A]">
                                 <Play size={13} strokeWidth={1.5} className="ml-0.5" />
                               </span>
                             </button>
@@ -285,7 +291,7 @@ export function DiagnosisPage({
                 >
                   <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-[var(--border)]">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 rounded-[8px] bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 rounded-[8px] bg-[#DCFCE7] border border-[#86EFAC] text-[#16A34A] flex items-center justify-center shrink-0">
                         <FileAudio size={18} strokeWidth={1.5} />
                       </div>
                       <div className="min-w-0">
@@ -308,13 +314,14 @@ export function DiagnosisPage({
                     metrics={metrics}
                     colormap={colormap}
                     showSpectrogram={false}
+                    decoding={decoding}
                   />
                 </motion.div>
               )}
             </AnimatePresence>
 
             {error && (
-              <div className="rounded-[8px] border border-[#EF4444]/40 bg-[#EF4444]/10 px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#F87171]">
+              <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2] px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#B91C1C]">
                 <AlertCircle size={16} strokeWidth={1.5} className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -345,7 +352,7 @@ export function DiagnosisPage({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#070A12] via-[#070A12]/30 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4">
-                <span className="text-[11px] font-mono-data text-[#38BDF8] uppercase">
+                <span className="text-[11px] font-mono-data text-[#86EFAC] uppercase">
                   Acoustic Capture Protocol
                 </span>
                 <h3 className="text-[15px] font-semibold text-white">
@@ -375,7 +382,7 @@ export function DiagnosisPage({
                   },
                 ].map((tip, idx) => (
                   <li key={tip.title} className="flex items-start gap-3">
-                    <span className="h-6 w-6 rounded-full bg-[#0EA5E9]/15 border border-[#38BDF8]/30 text-[#38BDF8] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="h-6 w-6 rounded-full bg-[#DCFCE7] border border-[#86EFAC] text-[#15803D] font-mono-data text-[12px] font-semibold flex items-center justify-center shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
                     <div>

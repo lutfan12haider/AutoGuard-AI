@@ -11,11 +11,12 @@ export function StatusBadge({
 }) {
   const tone = predictionToTone(prediction);
 
-  const badgeTone: Record<typeof tone, "healthy" | "warning" | "fault" | "accent"> = {
+  // Healthy: Green | Engine Knocking: Red warning | Misfire: Orange warning | Uncertain: Neutral
+  const badgeTone: Record<typeof tone, "healthy" | "warning" | "fault" | "neutral"> = {
     healthy: "healthy",
-    knock: "warning",
-    misfire: "fault",
-    uncertain: "accent",
+    knock: "fault",
+    misfire: "warning",
+    uncertain: "neutral",
   };
 
   const text = shortLabel
@@ -43,10 +44,10 @@ export function ConditionIcon({
   size?: number;
 }) {
   const tone = predictionToTone(prediction);
-  if (tone === "healthy") return <CheckCircle2 size={size} strokeWidth={1.5} className="text-[#4ADE80]" />;
-  if (tone === "knock") return <AlertTriangle size={size} strokeWidth={1.5} className="text-[#FBBF24]" />;
-  if (tone === "uncertain") return <HelpCircle size={size} strokeWidth={1.5} className="text-[#38BDF8]" />;
-  return <ShieldAlert size={size} strokeWidth={1.5} className="text-[#F87171]" />;
+  if (tone === "healthy") return <CheckCircle2 size={size} strokeWidth={1.75} className="text-[#16A34A]" />;
+  if (tone === "knock") return <ShieldAlert size={size} strokeWidth={1.75} className="text-[#DC2626]" />;
+  if (tone === "misfire") return <AlertTriangle size={size} strokeWidth={1.75} className="text-[#EA580C]" />;
+  return <HelpCircle size={size} strokeWidth={1.75} className="text-[#64748B]" />;
 }
 
 export function ConfidenceGauge({
@@ -70,11 +71,11 @@ export function ConfidenceGauge({
   const filledLen = (clamped / 100) * circumference;
 
   const strokeColor = {
-    healthy: "#22C55E",
-    knock: "#F59E0B",
-    misfire: "#EF4444",
-    uncertain: "#38BDF8",
-    accent: "#38BDF8",
+    healthy: "#16A34A",
+    knock: "#DC2626",
+    misfire: "#EA580C",
+    uncertain: "#64748B",
+    accent: "#16A34A",
   }[tone];
 
   return (
@@ -88,7 +89,7 @@ export function ConfidenceGauge({
           cy={center}
           r={radius}
           fill="none"
-          stroke="#1E293B"
+          stroke="#E2E8E4"
           strokeWidth={strokeWidth}
         />
         <circle
@@ -106,12 +107,12 @@ export function ConfidenceGauge({
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="font-mono-data text-[28px] leading-none font-semibold text-[#F8FAFC]">
+        <span className="font-mono-data text-[28px] leading-none font-semibold text-[#17211B]">
           {Math.round(clamped)}
-          <span className="text-[16px] text-[#94A3B8] font-normal">%</span>
+          <span className="text-[16px] text-[#5C6B62] font-normal">%</span>
         </span>
-        <span className="text-[12px] font-medium text-[#94A3B8] mt-1">{label}</span>
-        {sublabel && <span className="text-[11px] text-[#64748B] mt-0.5">{sublabel}</span>}
+        <span className="text-[12px] font-medium text-[#5C6B62] mt-1">{label}</span>
+        {sublabel && <span className="text-[11px] text-[#5C6B62] mt-0.5">{sublabel}</span>}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Card } from "./ui";
 
 export function SparklineChart({
   values,
-  color = "#38BDF8",
+  color = "#16A34A",
   height = 32,
 }: {
   values: number[];
@@ -12,9 +12,9 @@ export function SparklineChart({
 }) {
   if (!values || values.length < 2) {
     return (
-      <div className="flex items-end gap-0.5 h-7 opacity-40">
+      <div className="flex items-end gap-0.5 h-7 opacity-50">
         {[35, 50, 42, 68, 60, 75, 65, 82].map((v, i) => (
-          <div key={i} className="w-1 rounded-full bg-[#475569]" style={{ height: `${v}%` }} />
+          <div key={i} className="w-1 rounded-full bg-[#CBD5CF]" style={{ height: `${v}%` }} />
         ))}
       </div>
     );
@@ -92,18 +92,18 @@ export function CnnEpochChart({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between flex-wrap gap-2 text-[12px]">
-        <div className="flex items-center gap-4 text-[#CBD5E1]">
+        <div className="flex items-center gap-4 text-[#334239]">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-[#38BDF8]" /> Train loss
+            <span className="w-3 h-0.5 bg-[#16A34A]" /> Train loss
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-[#F59E0B]" /> Validation loss
+            <span className="w-3 h-0.5 bg-[#EA580C]" /> Validation loss
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-[#22C55E]" /> Validation accuracy
+            <span className="w-3 h-0.5 bg-[#17211B]" /> Validation accuracy
           </span>
         </div>
-        <div className="font-mono-data text-[12px] text-[#94A3B8]">
+        <div className="font-mono-data text-[12px] text-[#5C6B62]">
           {active
             ? `Epoch ${active.epoch}: train=${active.train_loss.toFixed(3)} · val=${active.val_loss.toFixed(3)} · acc=${(active.val_acc * 100).toFixed(1)}%`
             : "Hover points to inspect epoch metrics"}
@@ -112,7 +112,7 @@ export function CnnEpochChart({
 
       <svg
         viewBox={`0 0 ${w} ${h}`}
-        className="w-full h-52 rounded-[8px] bg-[#090D16] border border-[#1E293B]"
+        className="w-full h-52 rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4]"
       >
         {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
           const y = padT + frac * plotH;
@@ -120,20 +120,20 @@ export function CnnEpochChart({
           const accTick = `${Math.round((1 - frac) * 100)}%`;
           return (
             <g key={frac}>
-              <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#1E293B" strokeWidth="1" />
-              <text x={padL - 6} y={y + 3} textAnchor="end" fill="#94A3B8" fontSize="10" fontFamily="JetBrains Mono">
+              <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#E2E8E4" strokeWidth="1" />
+              <text x={padL - 6} y={y + 3} textAnchor="end" fill="#5C6B62" fontSize="10" fontFamily="JetBrains Mono">
                 {lossTick}
               </text>
-              <text x={w - padR + 6} y={y + 3} textAnchor="start" fill="#22C55E" fontSize="10" fontFamily="JetBrains Mono">
+              <text x={w - padR + 6} y={y + 3} textAnchor="start" fill="#16A34A" fontSize="10" fontFamily="JetBrains Mono">
                 {accTick}
               </text>
             </g>
           );
         })}
 
-        <polyline fill="none" stroke="#38BDF8" strokeWidth="2.2" points={trainPath} />
-        <polyline fill="none" stroke="#F59E0B" strokeWidth="2.2" points={valPath} />
-        <polyline fill="none" stroke="#22C55E" strokeWidth="2" strokeDasharray="4 3" points={accPath} />
+        <polyline fill="none" stroke="#16A34A" strokeWidth="2.2" points={trainPath} />
+        <polyline fill="none" stroke="#EA580C" strokeWidth="2.2" points={valPath} />
+        <polyline fill="none" stroke="#17211B" strokeWidth="2" strokeDasharray="4 3" points={accPath} />
 
         {epochs.map((e, i) => {
           const x = xFor(i);
@@ -149,13 +149,13 @@ export function CnnEpochChart({
                 y1={padT}
                 x2={x}
                 y2={h - padB}
-                stroke={hoverEpoch === e.epoch ? "rgba(56, 189, 248, 0.16)" : "transparent"}
+                stroke={hoverEpoch === e.epoch ? "rgba(22, 163, 74, 0.14)" : "transparent"}
                 strokeWidth="12"
               />
-              <circle cx={x} cy={yLoss(e.train_loss)} r="4" fill="#38BDF8" stroke="#090D16" strokeWidth="1.5" />
-              <circle cx={x} cy={yLoss(e.val_loss)} r="4" fill="#F59E0B" stroke="#090D16" strokeWidth="1.5" />
-              <circle cx={x} cy={yAcc(e.val_acc)} r="4" fill="#22C55E" stroke="#090D16" strokeWidth="1.5" />
-              <text x={x} y={h - 9} textAnchor="middle" fill="#94A3B8" fontSize="10" fontFamily="JetBrains Mono">
+              <circle cx={x} cy={yLoss(e.train_loss)} r="4" fill="#16A34A" stroke="#FFFFFF" strokeWidth="1.5" />
+              <circle cx={x} cy={yLoss(e.val_loss)} r="4" fill="#EA580C" stroke="#FFFFFF" strokeWidth="1.5" />
+              <circle cx={x} cy={yAcc(e.val_acc)} r="4" fill="#17211B" stroke="#FFFFFF" strokeWidth="1.5" />
+              <text x={x} y={h - 9} textAnchor="middle" fill="#5C6B62" fontSize="10" fontFamily="JetBrains Mono">
                 Ep {e.epoch}
               </text>
             </g>
@@ -183,13 +183,13 @@ export function ConfusionMatrixCard({
   return (
     <Card flat className="p-5 flex flex-col gap-4">
       <div>
-        <h4 className="text-[16px] font-semibold text-[#F8FAFC]">{title}</h4>
-        <p className="text-[13px] text-[#94A3B8] mt-0.5">{subtitle}</p>
+        <h4 className="text-[16px] font-semibold text-[#17211B]">{title}</h4>
+        <p className="text-[13px] text-[#5C6B62] mt-0.5">{subtitle}</p>
       </div>
 
       <div className="overflow-x-auto">
         <div className="min-w-[260px]">
-          <div className="grid grid-cols-[76px_repeat(3,1fr)] gap-1.5 text-[11px] font-medium text-[#94A3B8] mb-1.5">
+          <div className="grid grid-cols-[76px_repeat(3,1fr)] gap-1.5 text-[11px] font-medium text-[#5C6B62] mb-1.5">
             <div className="text-right pr-2">True \ Pred</div>
             {classes.map((c) => (
               <div key={c} className="text-center">
@@ -202,17 +202,17 @@ export function ConfusionMatrixCard({
             const rowSum = row.reduce((a, b) => a + b, 0) || 1;
             return (
               <div key={rIdx} className="grid grid-cols-[76px_repeat(3,1fr)] gap-1.5 mb-1.5">
-                <div className="flex items-center justify-end pr-2 text-[12px] font-medium text-[#CBD5E1]">
+                <div className="flex items-center justify-end pr-2 text-[12px] font-medium text-[#334239]">
                   {shortName(classes[rIdx] || "")}
                 </div>
                 {row.map((val, cIdx) => {
                   const ratio = val / rowSum;
                   const isDiag = rIdx === cIdx;
                   const cls = isDiag
-                    ? "bg-[#22C55E]/15 border-[#22C55E]/35 text-[#4ADE80]"
+                    ? "bg-[#DCFCE7] border-[#86EFAC] text-[#15803D]"
                     : val > 0
-                      ? "bg-[#EF4444]/15 border-[#EF4444]/35 text-[#F87171]"
-                      : "bg-[#090D16] border-[#1E293B] text-[#64748B]";
+                      ? "bg-[#FEE2E2] border-[#FECACA] text-[#B91C1C]"
+                      : "bg-[#F8FAF9] border-[#E2E8E4] text-[#94A39D]";
                   return (
                     <div
                       key={cIdx}

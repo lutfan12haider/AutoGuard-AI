@@ -135,30 +135,19 @@ def load_model() -> None:
 
 
 def warmup_model() -> None:
-    """Trigger Numba JIT so first real request isn't slow."""
+    """Trigger Numba JIT cleanly on non-silent synthetic audio so the first upload is fast."""
     global _pipeline, _label_encoder
     if _pipeline is None:
         return
     print("[Model] Warming up ...")
-    dummy = np.zeros(int(SAMPLE_RATE * 2), dtype=np.float32)
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-        tmp_path = tmp.name
+    rng = np.random.default_rng(42)
+    dummy = (0.01 * rng.standard_normal(int(SAMPLE_RATE * 1.5))).astype(np.float32)
     try:
-        sf.write(tmp_path, dummy, int(SAMPLE_RATE))
-        # warmup will raise ValueError (silent audio) — that's fine
-        try:
-            feat = _extract_model_features(tmp_path)
-            _pipeline.predict(feat.reshape(1, -1))
-        except ValueError:
-            pass
+        feat = _extract_v2_mfcc_features_from_array(dummy, int(SAMPLE_RATE))
+        _pipeline.predict_proba(feat.reshape(1, -1))
         print("[Model] Warmup complete.")
     except Exception as e:
         print(f"[Model] Warmup warning: {e}")
-    finally:
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
 
 
 def is_model_loaded() -> bool:
@@ -282,6 +271,11 @@ def predict_audio(audio_bytes: bytes, filename: str) -> dict:
             raise ValueError(
                 f"Audio too short ({duration_sec:.2f}s). "
                 "Please upload at least 0.5 seconds of engine audio."
+            )
+        if duration_sec > 180.0:
+            raise ValueError(
+                f"Audio too long ({duration_sec:.1f}s). "
+                "Maximum supported clip length is 180 seconds for low-memory inference."
             )
 
         # Load full audio (mono, target SR)

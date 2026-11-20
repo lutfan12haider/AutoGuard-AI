@@ -67,8 +67,8 @@ export function HistoryPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#F8FAFC] leading-tight">History</h2>
-          <p className="text-[14px] text-[#94A3B8] mt-1">
+          <h2 className="text-[28px] font-semibold text-white leading-tight">History</h2>
+          <p className="text-[14px] text-[#C0DCCB] mt-1">
             Review past engine checks, inspect repair recommendations, or export your log.
           </p>
         </div>
@@ -76,15 +76,15 @@ export function HistoryPage({
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            variant="secondary"
+            variant="emeraldOutline"
             size="sm"
             disabled={filtered.length === 0}
             onClick={() => exportHistoryToCsv(filtered)}
           >
             <Download size={14} strokeWidth={1.5} /> Download CSV
           </Button>
-          <Button type="button" onClick={() => onNavigate("diagnosis")}>
-            <Plus size={15} strokeWidth={1.5} /> Check engine
+          <Button type="button" variant="white" onClick={() => onNavigate("diagnosis")}>
+            <Plus size={15} strokeWidth={1.75} /> Check engine
           </Button>
         </div>
       </div>
@@ -97,9 +97,9 @@ export function HistoryPage({
       </div>
 
       <Card className="overflow-hidden">
-        <div className="p-4 border-b border-[#1E293B] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="flex items-center gap-2 rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3 py-2 flex-1 focus-within:border-[#38BDF8]">
-            <Search size={15} strokeWidth={1.5} className="text-[#94A3B8]" />
+        <div className="p-4 border-b border-[#E2E8E4] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex items-center gap-2 rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] px-3 py-2 flex-1 focus-within:border-[#16A34A]">
+            <Search size={15} strokeWidth={1.5} className="text-[#5C6B62]" />
             <input
               value={query}
               onChange={(e) => {
@@ -107,7 +107,7 @@ export function HistoryPage({
                 setPage(1);
               }}
               placeholder="Search recordings..."
-              className="bg-transparent text-[13px] text-[#F8FAFC] placeholder-[#64748B] w-full outline-none"
+              className="bg-transparent text-[13px] text-[#17211B] placeholder-[#7A8A80] w-full outline-none"
             />
           </div>
 
@@ -118,7 +118,7 @@ export function HistoryPage({
               setPage(1);
             }}
             aria-label="Filter by result"
-            className="rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3 py-2 text-[13px] text-[#F8FAFC] outline-none"
+            className="rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] px-3 py-2 text-[13px] text-[#17211B] outline-none focus:border-[#16A34A]"
           >
             <option value="all">All results</option>
             <option value="healthy">Healthy</option>
@@ -130,7 +130,7 @@ export function HistoryPage({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
             aria-label="Sort recordings"
-            className="rounded-[8px] bg-[#090D16] border border-[#1E293B] px-3 py-2 text-[13px] text-[#F8FAFC] outline-none"
+            className="rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] px-3 py-2 text-[13px] text-[#17211B] outline-none focus:border-[#16A34A]"
           >
             <option value="newest">Newest first</option>
             <option value="confidence_desc">Highest confidence</option>
@@ -189,12 +189,12 @@ export function HistoryPage({
                   <TableRow key={item.id}>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <FileAudio size={16} strokeWidth={1.5} className="text-[#38BDF8] shrink-0" />
+                        <FileAudio size={16} strokeWidth={1.5} className="text-[#16A34A] shrink-0" />
                         <div className="min-w-0">
-                          <div className="text-[13px] font-medium text-[#F8FAFC] truncate max-w-[240px]">
+                          <div className="text-[13px] font-medium text-[#17211B] truncate max-w-[240px]">
                             {item.filename}
                           </div>
-                          <div className="text-[12px] text-[#94A3B8]">
+                          <div className="text-[12px] text-[#5C6B62]">
                             {date} · {time}
                           </div>
                         </div>
@@ -203,10 +203,10 @@ export function HistoryPage({
                     <td className="py-3.5 px-4">
                       <StatusBadge prediction={item.prediction} shortLabel />
                     </td>
-                    <td className="py-3.5 px-4 font-mono-data text-[13px] font-semibold text-[#F8FAFC]">
+                    <td className="py-3.5 px-4 font-mono-data text-[13px] font-semibold text-[#17211B]">
                       {confPct}%
                     </td>
-                    <td className="py-3.5 px-4 font-mono-data text-[12px] text-[#94A3B8]">
+                    <td className="py-3.5 px-4 font-mono-data text-[12px] text-[#5C6B62]">
                       {formatDuration(item.duration_sec)}
                     </td>
                     <td className="py-3.5 px-4 text-right">
@@ -234,7 +234,7 @@ export function HistoryPage({
                           }}
                           aria-label={`Delete ${item.filename}`}
                         >
-                          <Trash2 size={14} strokeWidth={1.5} className="text-[#94A3B8] hover:text-[#F87171]" />
+                          <Trash2 size={14} strokeWidth={1.5} className="text-[#5C6B62] hover:text-[#DC2626]" />
                         </Button>
                       </div>
                     </td>
@@ -246,7 +246,7 @@ export function HistoryPage({
         )}
 
         {filtered.length > PAGE_SIZE && (
-          <div className="px-4 py-3 border-t border-[#1E293B] flex items-center justify-between text-[13px] text-[#94A3B8]">
+          <div className="px-4 py-3 border-t border-[#E2E8E4] flex items-center justify-between text-[13px] text-[#5C6B62]">
             <span className="font-mono-data">
               {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of{" "}
               {filtered.length}

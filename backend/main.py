@@ -108,6 +108,29 @@ app.add_middleware(
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
+def _status_and_recommendation(prediction: str, tier: str) -> tuple[str, str]:
+    """Map prediction & confidence tier to explicit status and concise recommendation."""
+    if tier == "low" or prediction == "uncertain":
+        return (
+            "inconclusive",
+            "Recording is inconclusive. Re-record closer to steady engine idle or arrange a physical inspection.",
+        )
+    if prediction == "healthy":
+        return (
+            "healthy_consistent",
+            "Consistent with healthy idle acoustics; continue routine maintenance (audio screening cannot rule out all mechanical issues).",
+        )
+    if tier == "moderate":
+        return (
+            "possible_indication",
+            "Possible fault acoustics detected (moderate confidence). Physical mechanic inspection recommended before repairs.",
+        )
+    return (
+        "likely_detected",
+        "Acoustic pattern detected; professional inspection recommended to verify mechanical cause.",
+    )
+
+
 def _validate_upload(file: UploadFile, data: bytes) -> None:
     """
     Raise HTTPException for invalid uploads.
@@ -226,6 +249,8 @@ async def analyze_audio(
         disagree_std     = result.get("disagree_std", 0.0),
     )
 
+    status_str, rec_summary = _status_and_recommendation(result["prediction"], recs["confidence_tier"])
+
     return AnalysisResult(
         scan_id                 = scan_id,
         filename                = file.filename,
@@ -242,6 +267,10 @@ async def analyze_audio(
         uncertain_reason        = result.get("uncertain_reason"),
         model_prediction        = result.get("model_prediction"),
         disagree_std            = result.get("disagree_std", 0.0),
+        status                  = status_str,
+        recommendation          = rec_summary,
+        score_calibration       = "platt_scaled_svm_probability",
+        model_used              = "V1 Acoustic SVM (288-MFCC)",
         confidence_tier         = recs["confidence_tier"],
         uncertainty_warning     = recs["uncertainty_warning"],
         diagnosis_overview      = recs["diagnosis_overview"],
@@ -412,6 +441,8 @@ async def diagnose_audio(
         except Exception as e:
             print(f"[DB] Insert failed for /api/diagnose: {e}")
 
+    status_str, rec_summary = _status_and_recommendation(result["prediction"], recs["confidence_tier"])
+
     return DiagnoseResult(
         prediction              = result["prediction"],
         predicted_class         = recs["predicted_class"],
@@ -423,6 +454,9 @@ async def diagnose_audio(
         created_at              = created_at,
         uncertain               = cnn_uncertain,
         uncertain_reason        = cnn_uncertain_reason,
+        status                  = status_str,
+        recommendation          = rec_summary,
+        score_calibration       = "uncalibrated_cnn_softmax",
         confidence_tier         = recs["confidence_tier"],
         uncertainty_warning     = recs["uncertainty_warning"],
         diagnosis_overview      = recs["diagnosis_overview"],
@@ -552,10 +586,18 @@ async def consensus_diagnose(
         except Exception as e:
             print(f"[DB] Insert failed for /api/consensus: {e}")
 
+    status_str, rec_summary = _status_and_recommendation(pred_label, recs["confidence_tier"])
+    out_prediction = "uncertain" if recs["confidence_tier"] == "low" else pred_label
+    used_label = (
+        "V1 Consensus (0.45 AutoGuardCNN + 0.55 SVM)"
+        if (cnn_res is not None and svm_res is not None)
+        else ("AutoGuardCNN" if cnn_res is not None else "V1 Acoustic SVM")
+    )
+
     return AnalysisResult(
         scan_id                 = scan_id,
         filename                = file.filename,
-        prediction              = pred_label,
+        prediction              = out_prediction,
         predicted_class         = recs["predicted_class"],
         confidence              = confidence,
         class_scores            = fused,
@@ -568,6 +610,10 @@ async def consensus_diagnose(
         uncertain_reason        = uncertain_reason,
         model_prediction        = pred_label,
         disagree_std            = disagree_std,
+        status                  = status_str,
+        recommendation          = rec_summary,
+        score_calibration       = "uncalibrated_consensus_score",
+        model_used              = used_label,
         confidence_tier         = recs["confidence_tier"],
         uncertainty_warning     = recs["uncertainty_warning"],
         diagnosis_overview      = recs["diagnosis_overview"],
@@ -630,9 +676,6 @@ async def list_sample_audio():
         ("kwerimoto/prepared/test/misfire", "misfire", "Held-Out Test · Engine Misfire", 3),
         ("kwerimoto/prepared/real_test/engine_knock", "engine_knock", "Real-World Knock Recording", 2),
         ("kaggledataset/car diagnostics dataset/idle state/normal_engine_idle", "healthy", "Kaggle · Normal Idle", 2),
-        ("kaggledataset/car diagnostics dataset/startup state/bad_ignition", "misfire", "Kaggle · Bad Ignition", 2),
-        ("kaggledataset/car diagnostics dataset/idle state/low_oil", "misfire", "Kaggle · Low Oil Rough Idle", 2),
-        ("kaggledataset/car diagnostics dataset/idle state/serpentine_belt", "misfire", "Kaggle · Serpentine Belt", 2),
     ]
     samples = []
     for rel_dir, expected_class, group_label, limit in candidates:
