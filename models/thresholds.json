@@ -1,0 +1,8 @@
+{
+  "abstain_threshold": 0.75,
+  "disagree_threshold": 0.2,
+  "chosen_from": "validation split only",
+  "retained_correct_frac": 0.992,
+  "precision_above_T": 0.8212,
+  "note": "Predict 'uncertain' when max(proba) < abstain_threshold OR std(window_top_confs) > disagree_threshold."
+}

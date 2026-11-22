@@ -1,0 +1,106 @@
+{
+  "model_name": "SVM",
+  "feature_config": {
+    "sample_rate": 22050,
+    "max_duration_seconds": 10.0,
+    "n_mfcc": 40,
+    "n_chroma": 12,
+    "n_contrast_bands": 6,
+    "feature_dim": 288,
+    "feature_groups": [
+      "mfcc_mean_std (80)",
+      "delta_mfcc_mean_std (80)",
+      "delta2_mfcc_mean_std (80)",
+      "spectral_contrast_mean_std (14)",
+      "chroma_mean_std (24)",
+      "zcr_mean_std (2)",
+      "rms_mean_std (2)",
+      "spectral_centroid_mean_std (2)",
+      "spectral_rolloff_mean_std (2)",
+      "spectral_bandwidth_mean_std (2)"
+    ],
+    "pooling": "mean_std",
+    "version": "v2"
+  },
+  "classes": [
+    "engine_knock",
+    "healthy",
+    "misfire"
+  ],
+  "class_to_index": {
+    "engine_knock": 0,
+    "healthy": 1,
+    "misfire": 2
+  },
+  "training": {
+    "train_samples": 721,
+    "train_class_counts": {
+      "engine_knock": 399,
+      "healthy": 246,
+      "misfire": 76
+    },
+    "train_time_sec": 0.56,
+    "infer_time_ms_per_sample": 0.242
+  },
+  "validation_metrics": {
+    "accuracy": 0.817,
+    "macro_f1": 0.813,
+    "confusion_matrix": [
+      [
+        72,
+        13,
+        0
+      ],
+      [
+        10,
+        41,
+        1
+      ],
+      [
+        2,
+        2,
+        12
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\nengine_knock       0.86      0.85      0.85        85\n     healthy       0.73      0.79      0.76        52\n     misfire       0.92      0.75      0.83        16\n\n    accuracy                           0.82       153\n   macro avg       0.84      0.80      0.81       153\nweighted avg       0.82      0.82      0.82       153\n"
+  },
+  "test_metrics": {
+    "accuracy": 0.8497,
+    "macro_f1": 0.8756,
+    "confusion_matrix": [
+      [
+        70,
+        14,
+        0
+      ],
+      [
+        8,
+        44,
+        1
+      ],
+      [
+        0,
+        0,
+        16
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\nengine_knock       0.90      0.83      0.86        84\n     healthy       0.76      0.83      0.79        53\n     misfire       0.94      1.00      0.97        16\n\n    accuracy                           0.85       153\n   macro avg       0.87      0.89      0.88       153\nweighted avg       0.85      0.85      0.85       153\n"
+  },
+  "real_test_metrics": {
+    "total_files": 38,
+    "correctly_identified_as_knock": 37,
+    "accuracy": 0.9737
+  },
+  "comparison": {
+    "SVM": {
+      "val_accuracy": 0.817,
+      "val_macro_f1": 0.813,
+      "train_time_sec": 0.56
+    },
+    "Random Forest": {
+      "val_accuracy": 0.8235,
+      "val_macro_f1": 0.802,
+      "train_time_sec": 1.24
+    }
+  }
+}
