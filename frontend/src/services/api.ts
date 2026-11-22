@@ -19,7 +19,7 @@ import type {
 const SETTINGS_KEY = "autoguard_settings_v2";
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  apiBaseUrl: "http://localhost:8000",
+apiBaseUrl: import.meta.env.VITE_API_URL || "http://localhost:8000",
   defaultMode: "dual",
   colormap: "thermal",
   playbackRate: 1.0,
