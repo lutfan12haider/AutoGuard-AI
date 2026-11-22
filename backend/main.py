@@ -93,6 +93,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://auto-guard-ai-omega.vercel.app",
         "http://localhost:8443",
         "http://127.0.0.1:8443",
         "http://localhost:5173",   # fallback if pnpm chooses default Vite port
