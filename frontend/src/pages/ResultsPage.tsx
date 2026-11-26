@@ -213,8 +213,8 @@ export function ResultsPage({
             <div
               className={`rounded-[10px] border p-4 flex items-start gap-3 ${
                 isLowConfidence || isUnsupported
-                  ? "border-[#FECACA] bg-[#FEE2E2] text-[#B91C1C]"
-                  : "border-[#FED7AA] bg-[#FFEDD5] text-[#C2410C]"
+                  ? "border-[#8C3B19] bg-[#2C150E] text-[#FDBA74]"
+                  : "border-[#784919] bg-[#2A1B0E] text-[#FCD34D]"
               }`}
             >
               <AlertTriangle size={18} strokeWidth={1.5} className="shrink-0 mt-0.5" />
@@ -382,8 +382,8 @@ export function ResultsPage({
                       <span
                         className={`h-5 w-5 rounded-full border font-mono-data text-[11px] font-semibold flex items-center justify-center shrink-0 mt-0.5 ${
                           report.prediction === "engine_knock"
-                            ? "bg-[#FEE2E2] border-[#FECACA] text-[#B91C1C]"
-                            : "bg-[#FFEDD5] border-[#FED7AA] text-[#C2410C]"
+                            ? "bg-[#2C150E] border-[#8C3B19] text-[#FDBA74]"
+                            : "bg-[#2A1B0E] border-[#784919] text-[#FCD34D]"
                         }`}
                       >
                         {idx + 1}
@@ -396,7 +396,7 @@ export function ResultsPage({
                 <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-subtle)] p-5 space-y-2 text-[14px] text-[var(--text-secondary)]">
                   {isHealthy ? (
                     <>
-                      <div className="font-semibold text-[#15803D]">
+                      <div className="font-semibold text-[#68B870]">
                         No supported fault pattern was identified.
                       </div>
                       <p className="text-[13px] text-[var(--text-muted)]">
@@ -454,16 +454,16 @@ export function ResultsPage({
                       }
                       className={`w-full rounded-[10px] border px-4 py-3 text-left transition-all flex items-center justify-between gap-3 ${
                         done
-                          ? "border-[#86EFAC] bg-[#DCFCE7] text-[#5C6B62]"
-                          : "border-[var(--border)] bg-[var(--surface-subtle)] hover:border-[#86EFAC] text-[var(--text)]"
+                          ? "border-[#2D5936] bg-[#13261B] text-[#8FA196]"
+                          : "border-[var(--border)] bg-[var(--surface-subtle)] hover:border-[#D86C2B] text-[var(--text)]"
                       }`}
                     >
                       <span className={`text-[14px] ${done ? "line-through" : ""}`}>{item}</span>
                       <span
                         className={`h-5 w-5 rounded-[6px] border flex items-center justify-center shrink-0 transition-colors ${
                           done
-                            ? "border-[#16A34A] bg-[#16A34A] text-white"
-                            : "border-[var(--border-strong)] bg-white"
+                            ? "border-[#5E9E62] bg-[#5E9E62] text-white"
+                            : "border-[var(--border-strong)] bg-[#0B140F]"
                         }`}
                       >
                         {done && <Check size={12} strokeWidth={2.5} />}
@@ -542,20 +542,20 @@ export function ResultsPage({
         <Card
           className={`p-6 border ${
             report.prediction === "engine_knock" && !isLowConfidence
-              ? "border-[#FECACA] bg-[#FEE2E2]/65"
+              ? "border-[#8C3B19] bg-[#2C150E]/65"
               : report.prediction === "misfire" && !isLowConfidence
-                ? "border-[#FED7AA] bg-[#FFEDD5]/70"
-                : "border-[#86EFAC] bg-[#DCFCE7]/50"
+                ? "border-[#784919] bg-[#2A1B0E]/70"
+                : "border-[#23633B] bg-[#11291B]/50"
           }`}
         >
           <div className="flex items-start gap-3.5">
             <div
               className={`h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0 border ${
                 report.prediction === "engine_knock" && !isLowConfidence
-                  ? "bg-[#FEE2E2] text-[#DC2626] border-[#FECACA]"
+                  ? "bg-[#3D1C12] text-[#FDBA74] border-[#8C3B19]"
                   : report.prediction === "misfire" && !isLowConfidence
-                    ? "bg-[#FFEDD5] text-[#EA580C] border-[#FED7AA]"
-                    : "bg-[#DCFCE7] text-[#16A34A] border-[#86EFAC]"
+                    ? "bg-[#3A2513] text-[#FCD34D] border-[#784919]"
+                    : "bg-[#152E1F] text-[#86EFAC] border-[#23633B]"
               }`}
             >
               <ShieldAlert size={20} strokeWidth={1.75} />

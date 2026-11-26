@@ -110,7 +110,7 @@ export function SpectrogramWorkbench({
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    ctx.strokeStyle = "#E2E8E4";
+    ctx.strokeStyle = "#1C2E24";
     ctx.lineWidth = 1;
     for (const frac of [0.25, 0.5, 0.75]) {
       ctx.beginPath();
@@ -128,13 +128,13 @@ export function SpectrogramWorkbench({
       const frac = i / peaks.length;
       const played = frac * 100 <= progressPct;
       const barH = Math.max(3, amp * (h - 16));
-      ctx.fillStyle = played ? "#16A34A" : amp > 0.78 ? "#EA580C" : "#94A39D";
+      ctx.fillStyle = played ? "#D86C2B" : amp > 0.78 ? "#F59E0B" : "#4E6A5A";
       ctx.fillRect(x + 0.5, midY - barH / 2, Math.max(1.5, barWidth - 1.5), barH);
     });
 
     if (effectiveDuration > 0) {
       const px = (progressPct / 100) * w;
-      ctx.strokeStyle = "#17211B";
+      ctx.strokeStyle = "#F2E8D5";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(px, 0);
@@ -243,8 +243,8 @@ export function SpectrogramWorkbench({
 
       <Card flat className="p-4 space-y-3">
         <div className="flex items-center justify-between text-[13px]">
-          <span className="font-medium text-[#17211B]">Acoustic waveform playback</span>
-          <span className="font-mono-data text-[#5C6B62]">{formatDuration(effectiveDuration)}</span>
+          <span className="font-medium text-[#EAE6DF]">Acoustic waveform playback</span>
+          <span className="font-mono-data text-[#8FA196]">{formatDuration(effectiveDuration)}</span>
         </div>
 
         <canvas
@@ -255,7 +255,7 @@ export function SpectrogramWorkbench({
             const rect = e.currentTarget.getBoundingClientRect();
             seekByFraction((e.clientX - rect.left) / rect.width);
           }}
-          className="w-full h-[80px] rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] cursor-pointer"
+          className="w-full h-[80px] rounded-[8px] bg-[#0B140F] border border-[#1C2E24] cursor-pointer"
         />
 
         <div className="pt-1 flex items-center gap-3">
@@ -263,15 +263,15 @@ export function SpectrogramWorkbench({
             type="button"
             onClick={togglePlay}
             disabled={!audioUrl}
-            className="h-9 w-9 rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white flex items-center justify-center transition-all active:scale-[0.96] disabled:opacity-40"
+            className="h-9 w-9 rounded-full bg-[#C86B32] hover:bg-[#B25923] text-white flex items-center justify-center transition-all active:scale-[0.96] disabled:opacity-40"
             aria-label={playing ? "Pause audio" : "Play audio"}
           >
             {playing ? <Pause size={15} strokeWidth={1.5} /> : <Play size={15} strokeWidth={1.5} className="ml-0.5" />}
           </button>
 
-          <span className="font-mono-data text-[13px] text-[#17211B] min-w-[84px]">
-            {formatDuration(currentTime)} <span className="text-[#94A39D]">/</span>{" "}
-            <span className="text-[#5C6B62]">{formatDuration(effectiveDuration)}</span>
+          <span className="font-mono-data text-[13px] text-[#EAE6DF] min-w-[84px]">
+            {formatDuration(currentTime)} <span className="text-[#556A5E]">/</span>{" "}
+            <span className="text-[#8FA196]">{formatDuration(effectiveDuration)}</span>
           </span>
 
           <input
@@ -285,7 +285,7 @@ export function SpectrogramWorkbench({
             aria-label="Audio playback timeline"
           />
 
-          <div className="hidden sm:flex items-center gap-2 text-[#5C6B62]">
+          <div className="hidden sm:flex items-center gap-2 text-[#8FA196]">
             <Volume2 size={15} strokeWidth={1.5} />
             <input
               type="range"
@@ -308,12 +308,12 @@ export function SpectrogramWorkbench({
       {showSpectrogram && (
         <Card flat className="p-4 space-y-3">
           <div className="flex items-center justify-between text-[13px]">
-            <span className="font-medium text-[#17211B]">Sound frequency map</span>
-            <span className="text-[12px] text-[#5C6B62]">Brighter regions show higher acoustic energy</span>
+            <span className="font-medium text-[#EAE6DF]">Sound frequency map</span>
+            <span className="text-[12px] text-[#8FA196]">Brighter regions show higher acoustic energy</span>
           </div>
 
           <div className="flex gap-2.5">
-            <div className="flex flex-col justify-between text-[11px] text-[#5C6B62] py-0.5 select-none w-9 text-right shrink-0">
+            <div className="flex flex-col justify-between text-[11px] text-[#8FA196] py-0.5 select-none w-9 text-right shrink-0">
               <span>High</span>
               <span>Mid</span>
               <span>Low</span>
@@ -326,7 +326,7 @@ export function SpectrogramWorkbench({
                 const rect = e.currentTarget.getBoundingClientRect();
                 seekByFraction((e.clientX - rect.left) / rect.width);
               }}
-              className="flex-1 w-full h-[132px] rounded-[8px] border border-[#E2E8E4] cursor-pointer"
+              className="flex-1 w-full h-[132px] rounded-[8px] border border-[#1C2E24] cursor-pointer"
             />
           </div>
         </Card>

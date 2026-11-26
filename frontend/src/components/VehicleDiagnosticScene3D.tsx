@@ -731,39 +731,39 @@ export function VehicleDiagnosticScene3D({
       return {
         headline: "INCONCLUSIVE / LOW CONFIDENCE",
         sub: "Recording ambiguity prevents definitive fault localization.",
-        cardCls: "border-[#CBD5CF] bg-white/95 text-[#17211B]",
-        pillCls: "bg-[#F1F5F3] text-[#334239] border-[#D4DDD7]",
-        dotCls: "bg-[#64748B]",
-        icon: <AlertTriangle size={18} className="text-[#64748B] shrink-0" />,
+        cardCls: "border-[#2B4336] bg-[#0B1510]/95 text-[#EAE6DF]",
+        pillCls: "bg-[#13221A] text-[#B8C5BD] border-[#2A4033]",
+        dotCls: "bg-[#7C8F83]",
+        icon: <AlertTriangle size={18} className="text-[#8FA196] shrink-0" />,
       };
     }
     if (condition === "engine_knock") {
       return {
         headline: "ENGINE KNOCKING DETECTED",
-        sub: "Red Warning · Pistons, Connecting Rods, Crankshaft & Oil Pan highlighted.",
-        cardCls: "border-[#DC2626] bg-white/95 text-[#17211B]",
-        pillCls: "bg-[#FEE2E2] text-[#B91C1C] border-[#FECACA]",
-        dotCls: "bg-[#DC2626] animate-ping",
-        icon: <ShieldAlert size={18} className="text-[#DC2626] shrink-0" />,
+        sub: "Orange-Red Warning · Pistons, Connecting Rods, Crankshaft & Oil Pan highlighted.",
+        cardCls: "border-[#C86B32] bg-[#0D1611]/95 text-[#EAE6DF]",
+        pillCls: "bg-[#2C150E] text-[#FDBA74] border-[#8C3B19]",
+        dotCls: "bg-[#EA580C] animate-ping",
+        icon: <ShieldAlert size={18} className="text-[#EA580C] shrink-0" />,
       };
     }
     if (condition === "misfire") {
       return {
         headline: "ENGINE MISFIRE DETECTED",
-        sub: "Orange Warning · Spark Plugs, Ignition Coils (COP) & Fuel Injectors highlighted.",
-        cardCls: "border-[#EA580C] bg-white/95 text-[#17211B]",
-        pillCls: "bg-[#FFEDD5] text-[#C2410C] border-[#FED7AA]",
-        dotCls: "bg-[#EA580C] animate-ping",
-        icon: <AlertTriangle size={18} className="text-[#EA580C] shrink-0" />,
+        sub: "Amber Warning · Spark Plugs, Ignition Coils (COP) & Fuel Injectors highlighted.",
+        cardCls: "border-[#D97706] bg-[#0D1611]/95 text-[#EAE6DF]",
+        pillCls: "bg-[#2A1B0E] text-[#FCD34D] border-[#784919]",
+        dotCls: "bg-[#F59E0B] animate-ping",
+        icon: <AlertTriangle size={18} className="text-[#F59E0B] shrink-0" />,
       };
     }
     return {
       headline: "ENGINE CONDITION HEALTHY",
       sub: "Normal 1-3-4-2 combustion cadence · Green baseline verification active.",
-      cardCls: "border-[#16A34A] bg-white/95 text-[#17211B]",
-      pillCls: "bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]",
-      dotCls: "bg-[#16A34A]",
-      icon: <CheckCircle2 size={18} className="text-[#16A34A] shrink-0" />,
+      cardCls: "border-[#3B6E4C] bg-[#0B1510]/95 text-[#EAE6DF]",
+      pillCls: "bg-[#11291B] text-[#86EFAC] border-[#23633B]",
+      dotCls: "bg-[#4ADE80]",
+      icon: <CheckCircle2 size={18} className="text-[#4ADE80] shrink-0" />,
     };
   }, [condition, isLowConf]);
 
@@ -776,15 +776,15 @@ export function VehicleDiagnosticScene3D({
   };
 
   const fallbackUi = (
-    <div className="p-8 bg-[#F8FAF9] text-center space-y-4">
-      <div className="mx-auto h-12 w-12 rounded-full bg-[#DCFCE7] border border-[#86EFAC] flex items-center justify-center text-[#16A34A]">
+    <div className="p-8 bg-[#0B140F] text-center space-y-4">
+      <div className="mx-auto h-12 w-12 rounded-full bg-[#13231A] border border-[#284233] flex items-center justify-center text-[#D86C2B]">
         <Wrench size={20} />
       </div>
       <div className="space-y-1">
-        <div className="text-[16px] font-semibold text-[#17211B]">{statusConfig.headline}</div>
-        <p className="text-[13px] text-[#5C6B62] max-w-md mx-auto">
+        <div className="text-[16px] font-semibold text-[#EAE6DF]">{statusConfig.headline}</div>
+        <p className="text-[13px] text-[#8FA196] max-w-md mx-auto">
           3D WebGL preview is unavailable in this display environment. Prediction confidence:{" "}
-          <strong className="font-mono-data text-[#17211B]">{Math.round(confidence * 100)}%</strong>{" "}
+          <strong className="font-mono-data text-[#F2E8D5]">{Math.round(confidence * 100)}%</strong>{" "}
           ({predictionToLabel(condition)}).
         </p>
       </div>
@@ -797,14 +797,14 @@ export function VehicleDiagnosticScene3D({
   );
 
   return (
-    <div className="rounded-[12px] border border-[#E2E8E4] bg-white overflow-hidden shadow-[0_1px_3px_rgba(23,33,27,0.05),0_8px_24px_rgba(23,33,27,0.04)]">
-      {/* Top White & Emerald Studio Control Strip */}
-      <div className="px-4 py-3 bg-[#F8FAF9] border-b border-[#E2E8E4] flex flex-wrap items-center justify-between gap-3">
+    <div className="rounded-[10px] border border-[#1C2E24] bg-[#0B140F] overflow-hidden shadow-[0_14px_36px_rgba(0,0,0,0.5)]">
+      {/* Top Dark Tactical Control Strip */}
+      <div className="px-4 py-3 bg-[#0D1812] border-b border-[#1C2E24] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 flex-wrap">
           <Badge tone={isLowConf ? "neutral" : condition === "healthy" ? "healthy" : condition === "engine_knock" ? "fault" : "warning"} dot>
             {PHASE_LABELS[phase]}
           </Badge>
-          <span className="text-[12px] font-mono-data text-[#5C6B62] hidden sm:inline">
+          <span className="text-[11px] font-mono-data uppercase tracking-wider text-[#8FA196] hidden sm:inline">
             2.0L DOHC I4 · 2023 Toyota Corolla Diagnostic Bay
           </span>
         </div>
@@ -844,16 +844,16 @@ export function VehicleDiagnosticScene3D({
       </div>
 
       {/* Interactive Architectural Diagnostic Bay Stage */}
-      <div className={`relative w-full ${compact ? "h-[420px]" : "h-[500px]"} bg-[#0A1E15] select-none`}>
+      <div className={`relative w-full ${compact ? "h-[420px]" : "h-[500px]"} bg-[#08110C] select-none`}>
         {webglOk ? (
           <Scene3DErrorBoundary fallback={fallbackUi}>
             {!sceneReady && (
-              <div className="absolute inset-0 z-20 bg-[#F8FAF9] flex flex-col items-center justify-center gap-3 text-[#5C6B62]">
-                <Activity size={26} className="animate-spin text-[#16A34A]" />
-                <div className="text-[14px] font-semibold text-[#17211B]">
+              <div className="absolute inset-0 z-20 bg-[#08110C] flex flex-col items-center justify-center gap-3 text-[#8FA196]">
+                <Activity size={26} className="animate-spin text-[#D86C2B]" />
+                <div className="text-[14px] font-semibold text-[#EAE6DF]">
                   Loading 2023 Toyota Corolla Diagnostic Bay...
                 </div>
-                <div className="text-[12px] font-mono-data text-[#5C6B62]">
+                <div className="text-[12px] font-mono-data text-[#7C8F83]">
                   Streaming Toyota Corolla &amp; 34-node engine GLB models
                 </div>
               </div>
@@ -863,8 +863,8 @@ export function VehicleDiagnosticScene3D({
               dpr={[1, 1.5]}
               camera={{ position: [3.85, 1.68, 4.10], fov: 38, near: 0.1, far: 80 }}
             >
-              <color attach="background" args={["#0A1E15"]} />
-              <fog attach="fog" args={["#0A1E15", 10, 24]} />
+              <color attach="background" args={["#08110C"]} />
+              <fog attach="fog" args={["#08110C", 10, 24]} />
 
               {/* Neutral Studio Automotive Lighting Rig */}
               <hemisphereLight args={["#FFFFFF", "#1B252E", 0.72]} />
@@ -901,8 +901,8 @@ export function VehicleDiagnosticScene3D({
         )}
 
         {/* Top-Right Compact Camera Presets */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 border border-[#E2E8E4] rounded-[8px] p-1 shadow-sm">
-          <Camera size={13} className="text-[#5C6B62] mx-1.5" />
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#0C1611]/95 border border-[#284033] rounded-full p-1 shadow-md">
+          <Camera size={13} className="text-[#8FA196] mx-1.5" />
           {(
             [
               { id: "sedan", label: "Exterior" },
@@ -918,10 +918,10 @@ export function VehicleDiagnosticScene3D({
                 if (cam.id !== "sedan") setBonnetOpen(true);
                 setCameraView(cam.id);
               }}
-              className={`px-2.5 py-1 rounded-[6px] text-[11px] font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-full text-[11px] font-mono-data uppercase tracking-wider font-semibold transition-colors ${
                 cameraView === cam.id
-                  ? "bg-[#16A34A] text-white"
-                  : "text-[#334239] hover:bg-[#DCFCE7]/60"
+                  ? "bg-[#C86B32] text-[#FFF5EC]"
+                  : "text-[#B8C5BD] hover:bg-[#16281E] hover:text-white"
               }`}
             >
               {cam.label}
@@ -933,28 +933,28 @@ export function VehicleDiagnosticScene3D({
         {warningVisible && (
           <div className="absolute bottom-3 left-3 right-3 sm:right-auto sm:max-w-lg pointer-events-none">
             <div
-              className={`pointer-events-auto rounded-[10px] border-2 px-4 py-3 shadow-lg flex items-center justify-between gap-4 transition-all duration-300 ${statusConfig.cardCls}`}
+              className={`pointer-events-auto rounded-[10px] border px-4 py-3 shadow-[0_12px_32px_rgba(0,0,0,0.65)] flex items-center justify-between gap-4 transition-all duration-300 ${statusConfig.cardCls}`}
             >
               <div className="flex items-start gap-3 min-w-0">
                 <div className="mt-0.5">{statusConfig.icon}</div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-mono-data font-bold tracking-wide ${statusConfig.pillCls}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-mono-data font-bold tracking-wider ${statusConfig.pillCls}`}
                     >
                       <span className={`h-1.5 w-1.5 rounded-full ${statusConfig.dotCls}`} />
                       {statusConfig.headline}
                     </span>
                   </div>
-                  <p className="text-[12px] text-[#334239] mt-1 leading-snug">{statusConfig.sub}</p>
+                  <p className="text-[12px] text-[#B8C5BD] mt-1 leading-snug">{statusConfig.sub}</p>
                 </div>
               </div>
 
-              <div className="text-right shrink-0 pl-3 border-l border-[#E2E8E4]">
-                <div className="font-mono-data text-[20px] font-bold text-[#17211B] leading-none">
+              <div className="text-right shrink-0 pl-3 border-l border-[#23382C]">
+                <div className="font-mono-data text-[20px] font-bold text-[#D86C2B] leading-none">
                   {Math.round(confidence * 100)}%
                 </div>
-                <div className="text-[10px] font-mono-data text-[#5C6B62] uppercase mt-1">
+                <div className="text-[10px] font-mono-data text-[#8FA196] uppercase mt-1">
                   Score
                 </div>
               </div>
@@ -964,9 +964,9 @@ export function VehicleDiagnosticScene3D({
       </div>
 
       {/* Crisp Footer Hint */}
-      <div className="px-4 py-2.5 bg-[#F8FAF9] border-t border-[#E2E8E4] flex flex-wrap items-center justify-between gap-2 text-[12px] text-[#5C6B62]">
+      <div className="px-4 py-2.5 bg-[#0D1812] border-t border-[#1C2E24] flex flex-wrap items-center justify-between gap-2 text-[12px] text-[#7C8F83]">
         <span>Drag to orbit · Scroll to zoom · Toggle Bonnet or Cutaway Reveal anytime</span>
-        <span className="font-mono-data text-[11px] text-[#15803D]">
+        <span className="font-mono-data text-[11px] text-[#D86C2B]">
           GSAP Sequence + Dual GLTF 2.0 Scene
         </span>
       </div>

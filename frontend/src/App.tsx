@@ -8,11 +8,6 @@ import {
   History,
   LayoutDashboard,
   Menu,
-  Moon,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Sun,
   X,
 } from "lucide-react";
 import type {
@@ -36,7 +31,6 @@ import {
   fetchStats,
   loadSettings,
   runUnifiedDiagnosis,
-  saveSettings,
 } from "./services/api";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DiagnosisPage } from "./pages/DiagnosisPage";
@@ -52,11 +46,10 @@ const LazyEngineLabPage = lazy(() =>
 
 export default function App() {
   const [page, setPage] = useState<AppPage>("dashboard");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [settings] = useState(() => loadSettings());
-  const theme: ThemeMode = "light";
+  const theme: ThemeMode = "dark";
 
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -75,11 +68,11 @@ export default function App() {
   const [preloadedExpected, setPreloadedExpected] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.setAttribute("data-theme", "dark");
   }, []);
 
   const toggleTheme = useCallback(() => {
-    document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.setAttribute("data-theme", "dark");
   }, []);
 
   const refreshBackendData = useCallback(async () => {
@@ -226,12 +219,18 @@ export default function App() {
     await refreshBackendData();
   };
 
-  const navItems: Array<{ id: AppPage; label: string; icon: typeof LayoutDashboard }> = [
-    { id: "dashboard", label: "Overview", icon: LayoutDashboard },
-    { id: "engine_lab", label: "3D Engine Lab", icon: Box },
-    { id: "diagnosis", label: "Check engine", icon: Activity },
-    { id: "results", label: "Results", icon: FileSearch },
-    { id: "history", label: "History", icon: History },
+  const navItems: Array<{
+    id: AppPage;
+    num: string;
+    label: string;
+    crumb: string;
+    icon: typeof LayoutDashboard;
+  }> = [
+    { id: "dashboard", num: "01", label: "OVERVIEW", crumb: "Diagnostics", icon: LayoutDashboard },
+    { id: "engine_lab", num: "02", label: "ENGINE LAB", crumb: "Engine Lab", icon: Box },
+    { id: "diagnosis", num: "03", label: "CHECK ENGINE", crumb: "Check Engine", icon: Activity },
+    { id: "results", num: "04", label: "RESULTS", crumb: "Results", icon: FileSearch },
+    { id: "history", num: "05", label: "HISTORY", crumb: "History", icon: History },
   ];
 
   const isOnline = health?.status === "ok";
@@ -239,170 +238,172 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]" style={{ backgroundImage: "var(--bg-gradient)" }}>
+      <div
+        className="min-h-screen bg-[var(--bg)] text-[var(--text)]"
+        style={{ backgroundImage: "var(--bg-gradient)" }}
+      >
         {menuOpen && (
           <button
             type="button"
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-[1px] lg:hidden"
+            className="fixed inset-0 z-30 bg-black/70 backdrop-blur-[2px] lg:hidden"
             aria-label="Close navigation"
           />
         )}
 
-        {/* Collapsible Forest Emerald Automotive Sidebar */}
+        {/* Tactical Obsidian-Emerald Automotive Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 bg-gradient-to-b from-[#062C19] to-[#041D11] border-r border-[#12492C] flex flex-col transition-all duration-200 ease-out ${
-            sidebarCollapsed ? "lg:w-[72px]" : "lg:w-[240px]"
-          } w-[240px] ${menuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+          className={`fixed inset-y-0 left-0 z-40 w-[184px] bg-[#08110C] border-r border-[#17281E] flex flex-col justify-between transition-transform duration-200 ease-out ${
+            menuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
         >
-          <div className="h-16 px-4 border-b border-[#12492C] flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-8 w-8 rounded-[8px] bg-[#16A34A] border border-[#22C55E]/50 text-white flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgba(22,163,74,0.4)]">
-                <Activity size={17} strokeWidth={1.75} />
-              </div>
-              {!sidebarCollapsed && (
-                <div className="truncate">
-                  <div className="text-[14px] font-semibold text-white leading-tight">
-                    AutoGuard AI
-                  </div>
-                  <div className="text-[11px] text-[#8EC4A3]">3D Diagnostic Lab</div>
+          <div>
+            {/* Top Brand Box */}
+            <div className="p-2.5 border-b border-[#16271D] flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => navigate("dashboard")}
+                className="w-full text-left rounded-[6px] border border-[#1E3327] bg-[#0B1610] hover:border-[#2E4D3B] px-3 py-2.5 transition-colors"
+              >
+                <div className="text-[13px] font-bold text-[#5E9E62] tracking-tight leading-tight">
+                  AutoGuard AI
                 </div>
-              )}
+                <div className="text-[11px] font-mono-data text-[#5E7466] mt-0.5">
+                  Diagnostic Lab
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                className="lg:hidden p-1.5 rounded-[6px] text-[#7C8F83] hover:text-white"
+                aria-label="Close sidebar"
+              >
+                <X size={16} strokeWidth={1.5} />
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setSidebarCollapsed((c) => !c)}
-              className="hidden lg:inline-flex p-1.5 rounded-[8px] text-[#95C4A9] hover:text-white hover:bg-[#0D3B23] transition-colors"
-              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {sidebarCollapsed ? (
-                <PanelLeftOpen size={16} strokeWidth={1.5} />
-              ) : (
-                <PanelLeftClose size={16} strokeWidth={1.5} />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              className="lg:hidden p-1.5 rounded-[8px] text-[#95C4A9] hover:text-white"
-              aria-label="Close sidebar"
-            >
-              <X size={18} strokeWidth={1.5} />
-            </button>
+            {/* Numbered Tactical Navigation List */}
+            <nav className="p-2.5 space-y-1" aria-label="Primary navigation">
+              {navItems.map((item) => {
+                const active = page === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => navigate(item.id)}
+                    className={`group w-full text-left transition-all duration-150 ${
+                      active
+                        ? "rounded-[6px] border border-[#2C3E34] bg-gradient-to-b from-[#142019] to-[#0D1712] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_14px_rgba(0,0,0,0.4)]"
+                        : "border-b border-[#132219] px-3.5 py-3 hover:bg-[#0D1812]"
+                    }`}
+                  >
+                    <div
+                      className={`font-mono-data text-[11px] font-bold leading-tight ${
+                        active
+                          ? "text-[#D86C2B]"
+                          : "text-[#3E6B50] group-hover:text-[#6B9F7E]"
+                      }`}
+                    >
+                      {item.num}
+                    </div>
+                    <div
+                      className={`font-mono-data text-[12px] font-bold tracking-[0.06em] uppercase mt-0.5 leading-tight ${
+                        active
+                          ? "text-[#D86C2B]"
+                          : "text-[#3E6B50] group-hover:text-[#8AB99B]"
+                      }`}
+                    >
+                      {item.label}
+                    </div>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto" aria-label="Primary navigation">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const active = page === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => navigate(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`w-full flex items-center ${
-                    sidebarCollapsed ? "justify-center px-2" : "px-3"
-                  } py-2.5 rounded-[8px] gap-3 text-[13px] font-medium transition-colors duration-150 ${
-                    active
-                      ? "bg-[#124B2D] text-white border border-[#22C55E]/40 shadow-sm"
-                      : "text-[#CBE2D4] hover:text-white hover:bg-[#0D3922] border border-transparent"
+          {/* Bottom Telemetry Status Box */}
+          <div className="p-2.5 border-t border-[#16271D]">
+            <div className="rounded-[6px] border border-[#231F1A] bg-[#0B120E] px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                    isOnline
+                      ? "bg-[#E05A2B] shadow-[0_0_8px_#E05A2B]"
+                      : "bg-[#EF4444]"
                   }`}
-                >
-                  <Icon
-                    size={17}
-                    strokeWidth={1.6}
-                    className={`shrink-0 ${active ? "text-[#4ADE80]" : "text-[#94C5A8]"}`}
-                  />
-                  {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Minimal Service Status */}
-          <div className="p-3 border-t border-[#12492C]">
-            <div
-              className={`flex items-center ${
-                sidebarCollapsed ? "justify-center" : "px-3"
-              } py-1.5 gap-2.5 text-[12px] text-[#CBE2D4]`}
-            >
-              <span
-                className={`h-2 w-2 rounded-full shrink-0 ${
-                  isOnline ? "bg-[#4ADE80] shadow-[0_0_8px_#4ADE80]" : "bg-[#EF4444]"
-                }`}
-              />
-              {!sidebarCollapsed && (
-                <span className="truncate">{isOnline ? "System ready" : "Service offline"}</span>
-              )}
+                />
+                <span className="font-mono-data text-[10px] font-bold tracking-wider uppercase text-[#D86C2B] truncate">
+                  {isOnline ? "SYSTEM READY" : "SERVICE OFFLINE"}
+                </span>
+              </div>
+              <div className="font-mono-data text-[10px] text-[#8C623E] tracking-tight mt-0.5 pl-3.5">
+                SYS.V4.0 · 1.2ms
+              </div>
             </div>
           </div>
         </aside>
 
         {/* Main Content Area */}
-        <main
-          className={`min-h-screen flex flex-col transition-all duration-200 ${
-            sidebarCollapsed ? "lg:pl-[72px]" : "lg:pl-[240px]"
-          }`}
-        >
-          {/* Crisp White Top Header Bar matching Design System */}
+        <main className="min-h-screen flex flex-col lg:pl-[184px]">
+          {/* Dark Tactical Top Header Bar */}
           <header
-            className="sticky top-0 z-20 h-16 backdrop-blur-md border-b border-[#D8E5DD] px-4 sm:px-8 flex items-center justify-between gap-4 no-print"
+            className="sticky top-0 z-20 h-14 backdrop-blur-md border-b border-[#16261D] px-4 sm:px-8 flex items-center justify-between gap-4 no-print"
             style={{ backgroundColor: "var(--header-bg)" }}
           >
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="lg:hidden p-1.5 rounded-[8px] border border-[#D8E5DD] text-[#5C6B62] hover:text-[#14221B]"
+                className="lg:hidden p-1.5 rounded-[6px] border border-[#23382C] text-[#8FA196] hover:text-white"
                 aria-label="Open navigation menu"
               >
-                <Menu size={18} strokeWidth={1.5} />
+                <Menu size={17} strokeWidth={1.5} />
               </button>
 
               <div className="flex items-center gap-2 text-[13px] min-w-0">
-                <span className="hidden sm:inline text-[#5C7165]">AutoGuard AI</span>
+                <button
+                  type="button"
+                  onClick={() => navigate("dashboard")}
+                  className="text-[#8C9E92] hover:text-[#EAE6DF] transition-colors"
+                >
+                  Overview
+                </button>
                 <ChevronRight
-                  size={14}
+                  size={13}
                   strokeWidth={1.5}
-                  className="hidden sm:inline text-[#8FA396]"
+                  className="text-[#566A5E]"
                 />
-                <h1 className="text-[14px] font-semibold text-[#0A2618] truncate">
-                  {currentNav?.label}
+                <h1 className="text-[13px] font-medium text-[#EAE6DF] truncate">
+                  {currentNav?.crumb ?? "Diagnostics"}
                 </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5">
-              <div className="hidden sm:inline-flex items-center gap-2 h-9 px-3.5 rounded-[8px] border border-[#167A46] bg-[#0B532F] text-[12px] font-medium text-white shadow-xs">
-                <span className="h-2 w-2 rounded-full bg-[#4ADE80]" />
-                <span>Diagnostic Lab · Local</span>
-              </div>
+              <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#C86B32] to-[#9A4C1E] border border-[#E08A54]/60 px-3.5 py-1 text-[10px] font-mono-data font-bold uppercase tracking-widest text-[#FFF5EC] shadow-[0_2px_12px_rgba(200,107,50,0.32)]">
+                ACTIVE ZONE
+              </span>
 
               <button
                 type="button"
                 onClick={() => setPaletteOpen(true)}
-                className="inline-flex items-center gap-2.5 h-9 px-3 rounded-[8px] border border-[#D8E5DD] bg-[#F5F8F6] hover:border-[#B8CEC1] text-[13px] text-[#4E6156] transition-colors"
+                title="Open Command Palette (⌘K)"
+                className="inline-flex items-center justify-center rounded-full bg-[#0C1611] border border-[#495C50] hover:border-[#8FA196] px-3.5 py-1 text-[10px] font-mono-data font-semibold uppercase tracking-widest text-[#D8E2DC] transition-colors"
               >
-                <Search size={14} strokeWidth={1.5} />
-                <span className="hidden sm:inline">Search...</span>
-                <kbd className="font-mono-data text-[11px] bg-white border border-[#D8E5DD] rounded-[4px] px-1.5 py-0.5 text-[#526358]">
-                  ⌘K
-                </kbd>
+                LOCAL LAB
               </button>
             </div>
           </header>
 
-          <div className="flex-1 max-w-[1320px] w-full mx-auto px-4 sm:px-8 py-8">
+          <div className="flex-1 max-w-[1380px] w-full mx-auto px-4 sm:px-7 py-5">
             {backendError && page !== "dashboard" && (
-              <div className="mb-6 rounded-[12px] border border-[#FECACA] bg-[#FEE2E2] px-4 py-3 text-[13px] text-[#B91C1C] flex items-center justify-between gap-3 shadow-sm">
+              <div className="mb-5 rounded-[10px] border border-[#8C3B19] bg-[#2C150E] px-4 py-3 text-[13px] text-[#FDBA74] flex items-center justify-between gap-3 shadow-sm">
                 <span>{backendError}</span>
                 <button
                   type="button"
                   onClick={() => setBackendError("")}
-                  className="text-[#B91C1C] hover:opacity-75"
+                  className="text-[#FDBA74] hover:opacity-75"
                   aria-label="Dismiss error"
                 >
                   <X size={15} strokeWidth={1.5} />
@@ -412,68 +413,68 @@ export default function App() {
 
             <div>
               {page === "dashboard" && (
-                  <DashboardPage
-                    stats={stats}
-                    recentRecords={records}
-                    health={health}
+                <DashboardPage
+                  stats={stats}
+                  recentRecords={records}
+                  health={health}
+                  samples={samples}
+                  loading={loadingDash}
+                  error={backendError}
+                  onNavigate={navigate}
+                  onInspectRecord={handleInspectRecord}
+                  onQuickTestSample={handleQuickTestSample}
+                />
+              )}
+
+              {page === "engine_lab" && (
+                <Suspense fallback={<Skeleton className="h-[640px] w-full rounded-[12px]" />}>
+                  <LazyEngineLabPage
+                    activeReport={activeReport}
                     samples={samples}
-                    loading={loadingDash}
-                    error={backendError}
-                    onNavigate={navigate}
-                    onInspectRecord={handleInspectRecord}
-                    onQuickTestSample={handleQuickTestSample}
-                  />
-                )}
-
-                {page === "engine_lab" && (
-                  <Suspense fallback={<Skeleton className="h-[640px] w-full rounded-[12px]" />}>
-                    <LazyEngineLabPage
-                      activeReport={activeReport}
-                      samples={samples}
-                      onReportUpdated={(report, f) => {
-                        setActiveReport(report);
-                        setActiveFile(f);
-                        refreshBackendData();
-                      }}
-                      onNavigate={navigate}
-                    />
-                  </Suspense>
-                )}
-
-                {page === "diagnosis" && (
-                  <DiagnosisPage
-                    defaultMode={settings.defaultMode}
-                    colormap={settings.colormap}
-                    samples={samples}
-                    preloadedFile={preloadedFile}
-                    preloadedSource={preloadedSource}
-                    preloadedExpected={preloadedExpected}
-                    onClearPreload={() => setPreloadedFile(null)}
-                    onClearBackendError={() => setBackendError("")}
-                    onRunDiagnosis={handleRunDiagnosis}
-                  />
-                )}
-
-                {page === "results" && (
-                  <ResultsPage
-                    report={activeReport}
-                    audioFile={activeFile}
-                    audioMetrics={activeMetrics}
-                    colormap={settings.colormap}
+                    onReportUpdated={(report, f) => {
+                      setActiveReport(report);
+                      setActiveFile(f);
+                      refreshBackendData();
+                    }}
                     onNavigate={navigate}
                   />
-                )}
+                </Suspense>
+              )}
 
-                {page === "history" && (
-                  <HistoryPage
-                    records={records}
-                    stats={stats}
-                    loading={loadingDash}
-                    onNavigate={navigate}
-                    onInspectRecord={handleInspectRecord}
-                    onDeleteRecord={handleDeleteRecord}
-                  />
-                )}
+              {page === "diagnosis" && (
+                <DiagnosisPage
+                  defaultMode={settings.defaultMode}
+                  colormap={settings.colormap}
+                  samples={samples}
+                  preloadedFile={preloadedFile}
+                  preloadedSource={preloadedSource}
+                  preloadedExpected={preloadedExpected}
+                  onClearPreload={() => setPreloadedFile(null)}
+                  onClearBackendError={() => setBackendError("")}
+                  onRunDiagnosis={handleRunDiagnosis}
+                />
+              )}
+
+              {page === "results" && (
+                <ResultsPage
+                  report={activeReport}
+                  audioFile={activeFile}
+                  audioMetrics={activeMetrics}
+                  colormap={settings.colormap}
+                  onNavigate={navigate}
+                />
+              )}
+
+              {page === "history" && (
+                <HistoryPage
+                  records={records}
+                  stats={stats}
+                  loading={loadingDash}
+                  onNavigate={navigate}
+                  onInspectRecord={handleInspectRecord}
+                  onDeleteRecord={handleDeleteRecord}
+                />
+              )}
             </div>
           </div>
         </main>

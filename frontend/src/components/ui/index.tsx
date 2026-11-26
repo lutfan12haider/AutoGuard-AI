@@ -15,25 +15,25 @@ export function Button({
   size?: "sm" | "md" | "lg";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 font-medium rounded-[8px] transition-all duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:opacity-45 disabled:active:scale-100 whitespace-nowrap";
+    "inline-flex items-center justify-center gap-2 font-medium rounded-[8px] transition-all duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C86B32] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:opacity-45 disabled:active:scale-100 whitespace-nowrap";
 
   const variants = {
     primary:
-      "bg-[#16A34A] hover:bg-[#15803D] text-white border border-[#15803D] shadow-[0_1px_4px_rgba(22,163,74,0.28)]",
+      "bg-gradient-to-b from-[#9E5B36] via-[#7E4424] to-[#5E3017] hover:brightness-110 text-[#FBF3EB] border border-[#C97E53]/70 font-mono-data uppercase tracking-wider shadow-[0_6px_18px_rgba(168,85,40,0.34),inset_0_1px_0_rgba(255,220,190,0.25)]",
     secondary:
-      "bg-white hover:bg-[#F8FAF9] text-[#14221B] border border-[#D4DDD7] shadow-[0_1px_2px_rgba(23,33,27,0.04)]",
+      "bg-[#122019] hover:bg-[#182B21] text-[#EAE6DF] border border-[#284033] shadow-[0_1px_3px_rgba(0,0,0,0.28)]",
     ghost:
-      "bg-transparent hover:bg-[#DCFCE7]/60 text-[#5C6B62] hover:text-[#17211B] border border-transparent",
+      "bg-transparent hover:bg-[#15261D] text-[#8FA196] hover:text-[#EAE6DF] border border-transparent",
     white:
-      "bg-white hover:bg-[#F0FDF4] text-[#072B18] border border-white/80 font-semibold shadow-[0_2px_10px_rgba(0,0,0,0.18)]",
+      "bg-gradient-to-b from-[#9E5B36] via-[#7E4424] to-[#5E3017] hover:brightness-110 text-[#FBF3EB] border border-[#C97E53]/70 font-mono-data font-semibold uppercase tracking-wider shadow-[0_6px_20px_rgba(168,85,40,0.38),inset_0_1px_0_rgba(255,220,190,0.28)]",
     emeraldOutline:
-      "bg-[#0B3B23]/85 hover:bg-[#135232] text-white border border-[#2D6E49] shadow-[0_1px_4px_rgba(0,0,0,0.16)]",
+      "bg-gradient-to-b from-[#9E6E2B] via-[#7D541B] to-[#5C3C10] hover:brightness-110 text-[#FBF5E8] border border-[#CFA055]/70 font-mono-data font-semibold uppercase tracking-wider shadow-[0_6px_20px_rgba(175,120,35,0.34),inset_0_1px_0_rgba(255,235,190,0.28)]",
   }[variant];
 
   const sizes = {
-    sm: "h-8 px-3 text-[12px]",
-    md: "h-9 px-4 text-[14px]",
-    lg: "h-11 px-5 text-[14px]",
+    sm: "h-8 px-3 text-[11px]",
+    md: "h-9 px-4 text-[12px]",
+    lg: "h-10 px-5 text-[12px]",
   }[size];
 
   return (
@@ -73,24 +73,24 @@ export function Badge({
   className?: string;
 }) {
   const toneStyles = {
-    neutral: "bg-[#F1F5F3] text-[#334239] border-[#D4DDD7]",
-    accent: "bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]",
-    healthy: "bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]",
-    warning: "bg-[#FFEDD5] text-[#C2410C] border-[#FED7AA]",
-    fault: "bg-[#FEE2E2] text-[#B91C1C] border-[#FECACA]",
+    neutral: "bg-[#122019] text-[#B8C5BD] border-[#284033]",
+    accent: "bg-[#152A1D] text-[#68B870] border-[#2F5938]",
+    healthy: "bg-[#11291B] text-[#4ADE80] border-[#23633B]",
+    warning: "bg-[#2A1B0E] text-[#F59E0B] border-[#784919]",
+    fault: "bg-[#2C150E] text-[#F97316] border-[#8C3B19]",
   }[tone];
 
   const dotStyles = {
-    neutral: "bg-[#64748B]",
-    accent: "bg-[#16A34A]",
-    healthy: "bg-[#16A34A]",
-    warning: "bg-[#EA580C]",
-    fault: "bg-[#DC2626]",
+    neutral: "bg-[#7C8F83]",
+    accent: "bg-[#5E9E62]",
+    healthy: "bg-[#4ADE80]",
+    warning: "bg-[#F59E0B]",
+    fault: "bg-[#EA580C]",
   }[tone];
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12px] font-medium whitespace-nowrap ${toneStyles} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-mono-data uppercase tracking-wider font-semibold whitespace-nowrap ${toneStyles} ${className}`}
     >
       {dot && <span className={`h-1.5 w-1.5 rounded-full ${dotStyles}`} />}
       {children}
@@ -104,7 +104,6 @@ export function Tabs<T extends string>({
   onChange,
   items,
   layoutId = "segmented-tab",
-  surface = "light",
 }: {
   value: T;
   onChange: (val: T) => void;
@@ -112,15 +111,10 @@ export function Tabs<T extends string>({
   layoutId?: string;
   surface?: "light" | "emerald";
 }) {
-  const isEmerald = surface === "emerald";
   return (
     <div
       role="tablist"
-      className={`inline-flex items-center p-1 rounded-[8px] border gap-0.5 ${
-        isEmerald
-          ? "bg-[#093620] border-[#1F5E3D]"
-          : "bg-[#F1F6F3] border-[#E2E8E4]"
-      }`}
+      className="inline-flex items-center p-1 rounded-full border bg-[#0B140F] border-[#384B40] gap-0.5"
     >
       {items.map((item) => {
         const active = value === item.id;
@@ -131,25 +125,15 @@ export function Tabs<T extends string>({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`relative px-3 py-1.5 rounded-[6px] text-[13px] font-medium transition-colors duration-150 inline-flex items-center gap-1.5 ${
-              isEmerald
-                ? active
-                  ? "text-white"
-                  : "text-[#CBE2D4] hover:text-white"
-                : active
-                  ? "text-[#17211B]"
-                  : "text-[#5C6B62] hover:text-[#17211B]"
+            className={`relative px-3.5 py-1 rounded-full text-[11px] font-mono-data uppercase tracking-wider font-semibold transition-colors duration-150 inline-flex items-center gap-1.5 ${
+              active ? "text-[#F2E9D8]" : "text-[#8FA196] hover:text-[#EAE6DF]"
             }`}
           >
             {active && (
               <motion.span
                 layoutId={layoutId}
                 transition={{ type: "spring", bounce: 0.16, duration: 0.3 }}
-                className={
-                  isEmerald
-                    ? "absolute inset-0 bg-[#16A34A] border border-[#22C55E]/50 rounded-[6px] shadow-[0_1px_6px_rgba(22,163,74,0.35)]"
-                    : "absolute inset-0 bg-white border border-[#CBD5CF] rounded-[6px] shadow-[0_1px_2px_rgba(23,33,27,0.06)]"
-                }
+                className="absolute inset-0 bg-[#182A20] border border-[#4D6657] rounded-full shadow-[0_1px_6px_rgba(0,0,0,0.4)]"
               />
             )}
             <span className="relative z-10 inline-flex items-center gap-1.5">
@@ -182,19 +166,21 @@ export function Stat({
   return (
     <Card flat className={`p-5 flex flex-col justify-between gap-3 ${className}`}>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[12px] font-medium text-[#5C6B62]">{label}</span>
+        <span className="text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#8FA196]">
+          {label}
+        </span>
         {icon && (
-          <span className="h-8 w-8 rounded-[8px] bg-[#DCFCE7]/60 border border-[#BBF7D0] flex items-center justify-center text-[#16A34A]">
+          <span className="h-8 w-8 rounded-[8px] bg-[#13231A] border border-[#274031] flex items-center justify-center text-[#D86C2B]">
             {icon}
           </span>
         )}
       </div>
       <div className="flex items-end justify-between gap-3">
         <div>
-          <div className="font-mono-data text-[28px] leading-none font-semibold text-[#17211B]">
+          <div className="font-mono-data text-[28px] leading-none font-bold text-[#EAE6DF]">
             {value}
           </div>
-          {subtext && <p className="text-[12px] text-[#5C6B62] mt-2">{subtext}</p>}
+          {subtext && <p className="text-[12px] text-[#7C8F83] mt-2">{subtext}</p>}
         </div>
         {trend}
       </div>
@@ -218,21 +204,21 @@ export function Stepper({
         return (
           <div key={step} className="flex items-center gap-2">
             <div
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-mono-data uppercase tracking-wider font-medium border transition-colors ${
                 current
-                  ? "bg-[#16A34A] text-white border-[#4ADE80]/60 shadow-[0_1px_6px_rgba(22,163,74,0.35)]"
+                  ? "bg-gradient-to-b from-[#9E5B36] to-[#6E3B1E] text-[#FFF5EC] border-[#C97E53]/70 shadow-[0_2px_10px_rgba(200,107,50,0.3)]"
                   : done
-                    ? "bg-[#0D4A2B] text-[#86EFAC] border-[#22C55E]/40"
-                    : "bg-[#093620] text-[#CBE2D4] border-[#1F5E3D]"
+                    ? "bg-[#13261B] text-[#68B870] border-[#2D5936]"
+                    : "bg-[#0C1611] text-[#7C8F83] border-[#1E3327]"
               }`}
             >
               <span
                 className={`h-5 w-5 rounded-full text-[11px] font-mono-data font-semibold inline-flex items-center justify-center ${
                   current
-                    ? "bg-white/25 text-white"
+                    ? "bg-black/25 text-white"
                     : done
-                      ? "bg-[#16A34A] text-white"
-                      : "bg-[#0E462A] text-[#A7C7B4]"
+                      ? "bg-[#4E7A2E] text-white"
+                      : "bg-[#13221A] text-[#7C8F83]"
                 }`}
               >
                 {done ? <Check size={12} strokeWidth={2} /> : idx + 1}
@@ -240,7 +226,7 @@ export function Stepper({
               <span>{step}</span>
             </div>
             {idx < steps.length - 1 && (
-              <ChevronRight size={15} strokeWidth={1.5} className="text-[#5EA87D]" />
+              <ChevronRight size={15} strokeWidth={1.5} className="text-[#496153]" />
             )}
           </div>
         );
@@ -283,14 +269,13 @@ export function Dropzone({
           onClick();
         }
       }}
-      className={`rounded-[12px] border-2 border-dashed px-6 py-12 text-center transition-all duration-150 ease-out cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16A34A] ${
+      className={`rounded-[12px] border-2 border-dashed px-6 py-12 text-center transition-all duration-150 ease-out cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C86B32] ${
         dragging
-          ? "border-[#16A34A] bg-[#DCFCE7]/70"
-          : "border-[#CBD5CF] bg-[#F8FAF9] hover:border-[#16A34A] hover:bg-[#DCFCE7]/35"
+          ? "border-[#C86B32] bg-[#1B1812]"
+          : "border-[#273E31] bg-[#0B140F] hover:border-[#C86B32]/80 hover:bg-[#111E17]"
       }`}
     >
-      {/* Emerald Automotive Waveform Illustration */}
-      <div className="mx-auto mb-5 w-20 h-14 rounded-[12px] bg-white border border-[#E2E8E4] shadow-[0_2px_8px_rgba(23,33,27,0.06)] flex items-center justify-center">
+      <div className="mx-auto mb-5 w-20 h-14 rounded-[10px] bg-[#122019] border border-[#263C30] shadow-[0_2px_8px_rgba(0,0,0,0.35)] flex items-center justify-center">
         <svg width="48" height="28" viewBox="0 0 48 28" fill="none" aria-hidden="true">
           {[8, 16, 24, 14, 26, 18, 12, 20, 10].map((h, i) => (
             <rect
@@ -300,17 +285,17 @@ export function Dropzone({
               width="2.5"
               height={h}
               rx="1.25"
-              fill={i === 4 || i === 2 || i === 7 ? "#16A34A" : "#94A39D"}
+              fill={i === 4 || i === 2 || i === 7 ? "#D86C2B" : "#4E6A5A"}
             />
           ))}
         </svg>
       </div>
 
-      <p className="text-[16px] font-semibold text-[#17211B]">{title}</p>
-      <p className="text-[14px] text-[#5C6B62] mt-1">
-        {subtitle} <span className="text-[#16A34A] font-semibold">Browse files</span>
+      <p className="text-[16px] font-semibold text-[#EAE6DF]">{title}</p>
+      <p className="text-[14px] text-[#8FA196] mt-1">
+        {subtitle} <span className="text-[#D86C2B] font-semibold">Browse files</span>
       </p>
-      <p className="text-[12px] text-[#7A8A80] mt-3 font-mono-data">{hint}</p>
+      <p className="text-[12px] text-[#6A7F72] mt-3 font-mono-data">{hint}</p>
     </div>
   );
 }
@@ -336,7 +321,7 @@ export function Tooltip({
       {show && (
         <span
           role="tooltip"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-[6px] bg-[#17211B] border border-[#334239] text-white text-[12px] whitespace-nowrap shadow-lg z-30 pointer-events-none"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-[6px] bg-[#0B140F] border border-[#2B4336] text-[#EAE6DF] text-[12px] whitespace-nowrap shadow-lg z-30 pointer-events-none"
         >
           {content}
         </span>
@@ -357,7 +342,7 @@ export function Table({ children }: { children: ReactNode }) {
 export function TableHeader({ children }: { children: ReactNode }) {
   return (
     <thead>
-      <tr className="bg-[#F8FAF9] border-b border-[#E2E8E4] text-[12px] font-medium text-[#5C6B62]">
+      <tr className="bg-[#111E17] border-b border-[#1C2E24] text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#8FA196]">
         {children}
       </tr>
     </thead>
@@ -372,7 +357,7 @@ export function TableRow({
   className?: string;
 }) {
   return (
-    <tr className={`border-b border-[#E2E8E4] last:border-b-0 hover:bg-[#DCFCE7]/30 transition-colors ${className}`}>
+    <tr className={`border-b border-[#1C2E24] last:border-b-0 hover:bg-[#13221A] transition-colors ${className}`}>
       {children}
     </tr>
   );
@@ -380,7 +365,7 @@ export function TableRow({
 
 /* ── Skeleton Loader & Empty State ──────────────────────────────────────────── */
 export function Skeleton({ className = "h-4 w-full" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-[8px] bg-[#E2E8E4] ${className}`} />;
+  return <div className={`animate-pulse rounded-[8px] bg-[#16271E] ${className}`} />;
 }
 
 export function EmptyState({
@@ -396,11 +381,11 @@ export function EmptyState({
 }) {
   return (
     <div className="py-12 px-6 text-center flex flex-col items-center justify-center">
-      <div className="h-12 w-12 rounded-full bg-[#DCFCE7] border border-[#86EFAC] flex items-center justify-center text-[#16A34A] mb-3">
+      <div className="h-12 w-12 rounded-full bg-[#13231A] border border-[#294234] flex items-center justify-center text-[#D86C2B] mb-3">
         {icon}
       </div>
-      <h3 className="text-[16px] font-semibold text-[#17211B]">{title}</h3>
-      <p className="text-[14px] text-[#5C6B62] mt-1 max-w-sm">{description}</p>
+      <p className="text-[14px] font-semibold text-[#EAE6DF]">{title}</p>
+      <p className="text-[13px] text-[#7C8F83] mt-1 max-w-sm">{description}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

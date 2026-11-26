@@ -271,7 +271,7 @@ export function DiagnosisPage({
                                   {s.filename}
                                 </div>
                               </div>
-                              <span className="shrink-0 h-8 w-8 rounded-full bg-white border border-[var(--border)] flex items-center justify-center text-[#16A34A]">
+                              <span className="shrink-0 h-8 w-8 rounded-full bg-[#0B1510] border border-[var(--border-strong)] flex items-center justify-center text-[#D86C2B]">
                                 <Play size={13} strokeWidth={1.5} className="ml-0.5" />
                               </span>
                             </button>
@@ -291,7 +291,7 @@ export function DiagnosisPage({
                 >
                   <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-[var(--border)]">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 rounded-[8px] bg-[#DCFCE7] border border-[#86EFAC] text-[#16A34A] flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 rounded-[8px] bg-[#13231A] border border-[#284233] text-[#D86C2B] flex items-center justify-center shrink-0">
                         <FileAudio size={18} strokeWidth={1.5} />
                       </div>
                       <div className="min-w-0">
@@ -321,7 +321,7 @@ export function DiagnosisPage({
             </AnimatePresence>
 
             {error && (
-              <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2] px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#B91C1C]">
+              <div className="rounded-[8px] border border-[#8C3B19] bg-[#2C150E] px-3.5 py-2.5 flex items-center gap-2 text-[13px] text-[#FDBA74]">
                 <AlertCircle size={16} strokeWidth={1.5} className="shrink-0" />
                 <span>{error}</span>
               </div>

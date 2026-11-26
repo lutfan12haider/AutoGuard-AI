@@ -90,15 +90,15 @@ export function EngineLabPage({
       {/* Header Banner */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-[12px] font-mono-data uppercase tracking-wider text-[#4ADE80] font-semibold mb-1">
+          <div className="inline-flex items-center gap-2 text-[12px] font-mono-data uppercase tracking-wider text-[#D86C2B] font-semibold mb-1">
             <Cpu size={14} strokeWidth={1.5} />
-            <span>Interactive 3D Powertrain Failure Lab · 2023 Toyota Corolla GLTF 2.0</span>
+            <span>Interactive Powertrain Failure Lab · 2023 Toyota Corolla GLTF 2.0</span>
           </div>
-          <h2 className="text-[28px] sm:text-[32px] font-semibold text-white leading-tight">
-            3D Corolla Bay &amp; Engine Component Inspection Lab
+          <h2 className="text-[28px] sm:text-[32px] font-semibold text-[#F2E8D5] leading-tight">
+            Corolla Bay &amp; Engine Component Inspection Lab
           </h2>
-          <p className="text-[14px] text-[#C0DCCB] mt-1 max-w-3xl">
-            Watch the 2023 Toyota Corolla bonnet open, inspect the 4-cylinder engine bay, and click individual 3D engine assemblies synchronized with live ML predictions.
+          <p className="text-[14px] text-[#8FA196] mt-1 max-w-3xl">
+            Watch the 2023 Toyota Corolla bonnet open, inspect the 4-cylinder engine bay, and click individual time-animated engine assemblies synchronized with live ML predictions.
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export function EngineLabPage({
       {/* Live Sample Audio Trigger Strip — Run Real ML Inference & Watch 3D Engine Update */}
       <Card className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center gap-3.5">
-          <div className="h-10 w-10 rounded-[10px] bg-[#DCFCE7] border border-[#86EFAC] text-[#16A34A] flex items-center justify-center shrink-0">
+          <div className="h-10 w-10 rounded-[10px] bg-[#13231A] border border-[#284233] text-[#D86C2B] flex items-center justify-center shrink-0">
             <Activity size={19} strokeWidth={1.75} />
           </div>
           <div>
@@ -144,9 +144,9 @@ export function EngineLabPage({
                 type="button"
                 disabled={Boolean(runningSampleId)}
                 onClick={() => handleRunLiveSampleInLab(s)}
-                className="px-3 py-2 rounded-[8px] border border-[var(--border)] bg-[var(--surface-subtle)] hover:border-[#16A34A] hover:bg-[#DCFCE7]/40 text-[12px] font-medium text-[var(--text)] flex items-center gap-2 transition-all disabled:opacity-50"
+                className="px-3 py-2 rounded-[8px] border border-[var(--border)] bg-[var(--surface-subtle)] hover:border-[#D86C2B] text-[12px] font-medium text-[var(--text)] flex items-center gap-2 transition-all disabled:opacity-50"
               >
-                <Play size={12} className={busy ? "animate-spin text-[#16A34A]" : "text-[#16A34A]"} />
+                <Play size={12} className={busy ? "animate-spin text-[#D86C2B]" : "text-[#D86C2B]"} />
                 <span>
                   {busy ? "Running ML..." : `Test ${predictionToLabel(s.expected_class)} Audio`}
                 </span>
@@ -157,7 +157,7 @@ export function EngineLabPage({
       </Card>
 
       {labError && (
-        <div className="rounded-[10px] border border-[#FECACA] bg-[#FEE2E2] px-4 py-3 text-[13px] text-[#B91C1C]">
+        <div className="rounded-[10px] border border-[#8C3B19] bg-[#2C150E] px-4 py-3 text-[13px] text-[#FDBA74]">
           {labError}
         </div>
       )}
@@ -173,14 +173,14 @@ export function EngineLabPage({
             onChange={setLabView}
             layoutId="engine-lab-view-tab"
             items={[
-              { id: "vehicle", label: "3D Corolla Diagnostic Bay" },
+              { id: "vehicle", label: "Corolla Diagnostic Bay" },
               { id: "cutaway", label: "34-Part Engine Cutaway" },
             ]}
           />
-          <span className="text-[12px] text-[#C0DCCB]">
+          <span className="text-[12px] text-[#8FA196]">
             {labView === "vehicle"
               ? "Automated camera approach · Opening bonnet · Live fault illumination"
-              : "Click any component in the 3D cutaway to inspect ML correlation"}
+              : "Click any component in the cutaway to inspect ML correlation"}
           </span>
         </div>
 
@@ -230,32 +230,32 @@ export function EngineLabPage({
 
           <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
             <div className="space-y-2.5 text-[13px]">
-              <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/55 p-3">
-                <div className="font-semibold text-[#DC2626] flex items-center gap-1.5">
+              <div className="rounded-[8px] border border-[#8C3B19] bg-[#2C150E]/75 p-3">
+                <div className="font-semibold text-[#FDBA74] flex items-center gap-1.5">
                   <AlertTriangle size={14} />
-                  <span>Engine Knocking Targets (Red Warning)</span>
+                  <span>Engine Knocking Targets (Orange-Red Warning)</span>
                 </div>
-                <p className="text-[12px] text-[#334239] mt-1">
-                  Highlights <strong>Combustion Chambers</strong>, <strong>Forged Pistons</strong>, <strong>Connecting Rods</strong>, <strong>Crankshaft</strong>, and <strong>Oil Pan</strong>.
+                <p className="text-[12px] text-[#B8C5BD] mt-1">
+                  Highlights <strong className="text-[#F2E8D5]">Combustion Chambers</strong>, <strong className="text-[#F2E8D5]">Forged Pistons</strong>, <strong className="text-[#F2E8D5]">Connecting Rods</strong>, <strong className="text-[#F2E8D5]">Crankshaft</strong>, and <strong className="text-[#F2E8D5]">Oil Pan</strong>.
                 </p>
               </div>
 
-              <div className="rounded-[8px] border border-[#FED7AA] bg-[#FFEDD5]/60 p-3">
-                <div className="font-semibold text-[#EA580C] flex items-center gap-1.5">
+              <div className="rounded-[8px] border border-[#784919] bg-[#2A1B0E]/80 p-3">
+                <div className="font-semibold text-[#FCD34D] flex items-center gap-1.5">
                   <Flame size={14} />
-                  <span>Misfire Highlight Targets (Orange Warning)</span>
+                  <span>Misfire Highlight Targets (Amber Warning)</span>
                 </div>
-                <p className="text-[12px] text-[#334239] mt-1">
-                  Highlights <strong>Spark Plugs (1–4)</strong>, <strong>Ignition Coils (COP 1–4)</strong>, and <strong>Fuel Injectors &amp; Common Rail</strong>.
+                <p className="text-[12px] text-[#B8C5BD] mt-1">
+                  Highlights <strong className="text-[#F2E8D5]">Spark Plugs (1–4)</strong>, <strong className="text-[#F2E8D5]">Ignition Coils (COP 1–4)</strong>, and <strong className="text-[#F2E8D5]">Fuel Injectors &amp; Common Rail</strong>.
                 </p>
               </div>
 
-              <div className="rounded-[8px] border border-[#86EFAC] bg-[#DCFCE7]/55 p-3">
-                <div className="font-semibold text-[#16A34A] flex items-center gap-1.5">
+              <div className="rounded-[8px] border border-[#23633B] bg-[#11291B]/75 p-3">
+                <div className="font-semibold text-[#86EFAC] flex items-center gap-1.5">
                   <CheckCircle2 size={14} />
                   <span>Healthy Engine State (Green)</span>
                 </div>
-                <p className="text-[12px] text-[#334239] mt-1">
+                <p className="text-[12px] text-[#B8C5BD] mt-1">
                   Subtle green ambient illumination with smooth 1-3-4-2 firing cadence across all four cylinders.
                 </p>
               </div>
@@ -332,8 +332,8 @@ export function EngineLabPage({
               </div>
             </div>
 
-            <div className="rounded-[10px] border border-[#FECACA] bg-[#FEE2E2]/65 p-3.5 flex items-start gap-3">
-              <ShieldAlert size={18} className="text-[#DC2626] shrink-0 mt-0.5" />
+            <div className="rounded-[10px] border border-[#8C3B19] bg-[#2C150E]/75 p-3.5 flex items-start gap-3">
+              <ShieldAlert size={18} className="text-[#EA580C] shrink-0 mt-0.5" />
               <div className="text-[13px]">
                 <span className="font-semibold text-[var(--text)]">Safety Advisory: </span>
                 <span className="text-[var(--text-secondary)]">

@@ -97,9 +97,9 @@ export function HistoryPage({
       </div>
 
       <Card className="overflow-hidden">
-        <div className="p-4 border-b border-[#E2E8E4] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="flex items-center gap-2 rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] px-3 py-2 flex-1 focus-within:border-[#16A34A]">
-            <Search size={15} strokeWidth={1.5} className="text-[#5C6B62]" />
+        <div className="p-4 border-b border-[var(--border)] flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex items-center gap-2 rounded-[8px] bg-[#111E17] border border-[var(--border)] px-3 py-2 flex-1 focus-within:border-[#D86C2B]">
+            <Search size={15} strokeWidth={1.5} className="text-[#7C8F83]" />
             <input
               value={query}
               onChange={(e) => {
@@ -107,7 +107,7 @@ export function HistoryPage({
                 setPage(1);
               }}
               placeholder="Search recordings..."
-              className="bg-transparent text-[13px] text-[#17211B] placeholder-[#7A8A80] w-full outline-none"
+              className="bg-transparent text-[13px] text-[var(--text)] placeholder-[#7C8F83] w-full outline-none"
             />
           </div>
 
@@ -118,7 +118,7 @@ export function HistoryPage({
               setPage(1);
             }}
             aria-label="Filter by result"
-            className="rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] px-3 py-2 text-[13px] text-[#17211B] outline-none focus:border-[#16A34A]"
+            className="rounded-[8px] bg-[#111E17] border border-[var(--border)] px-3 py-2 text-[13px] text-[var(--text)] outline-none focus:border-[#D86C2B]"
           >
             <option value="all">All results</option>
             <option value="healthy">Healthy</option>
@@ -130,7 +130,7 @@ export function HistoryPage({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
             aria-label="Sort recordings"
-            className="rounded-[8px] bg-[#F8FAF9] border border-[#E2E8E4] px-3 py-2 text-[13px] text-[#17211B] outline-none focus:border-[#16A34A]"
+            className="rounded-[8px] bg-[#111E17] border border-[var(--border)] px-3 py-2 text-[13px] text-[var(--text)] outline-none focus:border-[#D86C2B]"
           >
             <option value="newest">Newest first</option>
             <option value="confidence_desc">Highest confidence</option>
@@ -189,12 +189,12 @@ export function HistoryPage({
                   <TableRow key={item.id}>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <FileAudio size={16} strokeWidth={1.5} className="text-[#16A34A] shrink-0" />
+                        <FileAudio size={16} strokeWidth={1.5} className="text-[#D86C2B] shrink-0" />
                         <div className="min-w-0">
-                          <div className="text-[13px] font-medium text-[#17211B] truncate max-w-[240px]">
+                          <div className="text-[13px] font-medium text-[var(--text)] truncate max-w-[240px]">
                             {item.filename}
                           </div>
-                          <div className="text-[12px] text-[#5C6B62]">
+                          <div className="text-[12px] text-[var(--text-muted)]">
                             {date} · {time}
                           </div>
                         </div>
@@ -203,10 +203,10 @@ export function HistoryPage({
                     <td className="py-3.5 px-4">
                       <StatusBadge prediction={item.prediction} shortLabel />
                     </td>
-                    <td className="py-3.5 px-4 font-mono-data text-[13px] font-semibold text-[#17211B]">
+                    <td className="py-3.5 px-4 font-mono-data text-[13px] font-semibold text-[var(--text)]">
                       {confPct}%
                     </td>
-                    <td className="py-3.5 px-4 font-mono-data text-[12px] text-[#5C6B62]">
+                    <td className="py-3.5 px-4 font-mono-data text-[12px] text-[var(--text-muted)]">
                       {formatDuration(item.duration_sec)}
                     </td>
                     <td className="py-3.5 px-4 text-right">
@@ -234,7 +234,7 @@ export function HistoryPage({
                           }}
                           aria-label={`Delete ${item.filename}`}
                         >
-                          <Trash2 size={14} strokeWidth={1.5} className="text-[#5C6B62] hover:text-[#DC2626]" />
+                          <Trash2 size={14} strokeWidth={1.5} className="text-[var(--text-muted)] hover:text-[#EA580C]" />
                         </Button>
                       </div>
                     </td>
@@ -246,7 +246,7 @@ export function HistoryPage({
         )}
 
         {filtered.length > PAGE_SIZE && (
-          <div className="px-4 py-3 border-t border-[#E2E8E4] flex items-center justify-between text-[13px] text-[#5C6B62]">
+          <div className="px-4 py-3 border-t border-[var(--border)] flex items-center justify-between text-[13px] text-[var(--text-muted)]">
             <span className="font-mono-data">
               {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of{" "}
               {filtered.length}

@@ -986,25 +986,25 @@ export function EngineLab3D({
   };
 
   return (
-    <div className="rounded-[12px] border border-[#E2E8E4] bg-white text-[#17211B] overflow-hidden shadow-[0_1px_3px_rgba(23,33,27,0.05),0_8px_24px_rgba(23,33,27,0.04)]">
+    <div className="rounded-[10px] border border-[#1C2E24] bg-[#0B140F] text-[#EAE6DF] overflow-hidden shadow-[0_14px_36px_rgba(0,0,0,0.5)]">
       {/* ── Top CAD Cockpit Toolbar ──────────────────────────────────────────── */}
-      <div className="px-4 py-3 bg-[#F8FAF9] border-b border-[#E2E8E4] flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="px-4 py-3 bg-[#0D1812] border-b border-[#1C2E24] flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             type="button"
             onClick={() => setShowBrowserTree((v) => !v)}
-            className={`px-2.5 py-1.5 rounded-[6px] text-[12px] font-medium border flex items-center gap-1.5 transition-colors ${
+            className={`px-2.5 py-1.5 rounded-[6px] text-[11px] font-mono-data uppercase tracking-wider font-semibold border flex items-center gap-1.5 transition-colors ${
               showBrowserTree
-                ? "bg-[#DCFCE7] border-[#86EFAC] text-[#15803D]"
-                : "bg-white border-[#D4DDD7] text-[#5C6B62] hover:text-[#17211B]"
+                ? "bg-[#16291E] border-[#3E634D] text-[#F2E8D5]"
+                : "bg-[#0B140F] border-[#263C30] text-[#8FA196] hover:text-[#EAE6DF]"
             }`}
           >
-            <Layers size={14} strokeWidth={1.5} />
+            <Layers size={13} strokeWidth={1.5} />
             <span>Assemblies ({ENGINE_COMPONENTS.length})</span>
           </button>
 
           {/* Render Style Selector (Cutaway X-Ray / Metallic PBR / Blueprint CAD) */}
-          <div className="inline-flex items-center rounded-[8px] bg-[#F1F6F3] border border-[#E2E8E4] p-0.5">
+          <div className="inline-flex items-center rounded-[8px] bg-[#09110C] border border-[#22362B] p-0.5">
             {(
               [
                 { id: "xray", label: "Cutaway X-Ray", icon: Eye },
@@ -1019,10 +1019,10 @@ export function EngineLab3D({
                   key={mode.id}
                   type="button"
                   onClick={() => setRenderStyle(mode.id)}
-                  className={`px-2.5 py-1 rounded-[6px] text-[12px] font-medium flex items-center gap-1.5 transition-colors ${
+                  className={`px-2.5 py-1 rounded-[6px] text-[11px] font-mono-data uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-colors ${
                     active
-                      ? "bg-white text-[#15803D] border border-[#CBD5CF] shadow-xs"
-                      : "text-[#5C6B62] hover:text-[#17211B] border border-transparent"
+                      ? "bg-[#17281F] text-[#D86C2B] border border-[#3A5344] shadow-xs"
+                      : "text-[#8FA196] hover:text-[#EAE6DF] border border-transparent"
                   }`}
                 >
                   <Icon size={13} strokeWidth={1.5} />
@@ -1033,12 +1033,12 @@ export function EngineLab3D({
           </div>
 
           {/* Exploded View Control */}
-          <div className="flex items-center gap-2 bg-white border border-[#E2E8E4] rounded-[8px] px-2.5 py-1">
+          <div className="flex items-center gap-2 bg-[#0B140F] border border-[#22362B] rounded-[8px] px-2.5 py-1">
             <button
               type="button"
               onClick={() => setExplodeAmount((v) => (v > 0.1 ? 0 : 0.75))}
-              className={`text-[12px] font-medium flex items-center gap-1 ${
-                explodeAmount > 0.05 ? "text-[#16A34A]" : "text-[#5C6B62] hover:text-[#17211B]"
+              className={`text-[11px] font-mono-data uppercase tracking-wider font-semibold flex items-center gap-1 ${
+                explodeAmount > 0.05 ? "text-[#D86C2B]" : "text-[#8FA196] hover:text-[#EAE6DF]"
               }`}
             >
               <Maximize2 size={13} strokeWidth={1.5} />
@@ -1054,7 +1054,7 @@ export function EngineLab3D({
               className="studio-slider w-16 sm:w-20"
               aria-label="Exploded view distance"
             />
-            <span className="font-mono-data text-[11px] text-[#5C6B62] w-8 text-right">
+            <span className="font-mono-data text-[11px] text-[#8FA196] w-8 text-right">
               {Math.round(explodeAmount * 100)}%
             </span>
           </div>
@@ -1063,12 +1063,12 @@ export function EngineLab3D({
         {/* ML Class Highlight Filter / Interactive Mode Switcher */}
         <div className="flex items-center gap-2 flex-wrap">
           {allowSimulationOverride && (
-            <div className="inline-flex items-center rounded-[8px] bg-[#F1F6F3] border border-[#E2E8E4] p-0.5 text-[12px] select-none">
+            <div className="inline-flex items-center rounded-[8px] bg-[#09110C] border border-[#22362B] p-0.5 text-[11px] font-mono-data uppercase tracking-wider select-none">
               {(
                 [
-                  { id: "healthy", label: "Healthy", dot: "bg-[#16A34A]" },
-                  { id: "misfire", label: "Misfire", dot: "bg-[#EA580C]" },
-                  { id: "engine_knock", label: "Engine Knocking", dot: "bg-[#DC2626]" },
+                  { id: "healthy", label: "Healthy", dot: "bg-[#4ADE80]" },
+                  { id: "misfire", label: "Misfire", dot: "bg-[#F59E0B]" },
+                  { id: "engine_knock", label: "Engine Knocking", dot: "bg-[#EA580C]" },
                 ] as const
               ).map((cls) => {
                 const active = activeCondition === cls.id;
@@ -1082,10 +1082,10 @@ export function EngineLab3D({
                       else if (cls.id === "engine_knock") setSelectedId("combustion_chamber");
                       else setSelectedId(null);
                     }}
-                    className={`px-2.5 py-1 rounded-[6px] font-medium flex items-center gap-1.5 transition-colors ${
+                    className={`px-2.5 py-1 rounded-[6px] font-semibold flex items-center gap-1.5 transition-colors ${
                       active
-                        ? "bg-white text-[#17211B] border border-[#CBD5CF] shadow-xs"
-                        : "text-[#5C6B62] hover:text-[#17211B] border border-transparent"
+                        ? "bg-[#17281F] text-[#F2E8D5] border border-[#3A5344] shadow-xs"
+                        : "text-[#8FA196] hover:text-[#EAE6DF] border border-transparent"
                     }`}
                   >
                     <span className={`h-2 w-2 rounded-full ${cls.dot}`} />
@@ -1100,7 +1100,7 @@ export function EngineLab3D({
             <button
               type="button"
               onClick={() => handleZoom("in")}
-              className="p-1.5 rounded-[6px] bg-white border border-[#D4DDD7] text-[#5C6B62] hover:text-[#17211B]"
+              className="p-1.5 rounded-[6px] bg-[#0B140F] border border-[#263C30] text-[#8FA196] hover:text-[#EAE6DF]"
               aria-label="Zoom in 3D engine"
               title="Zoom in"
             >
@@ -1109,7 +1109,7 @@ export function EngineLab3D({
             <button
               type="button"
               onClick={() => handleZoom("out")}
-              className="p-1.5 rounded-[6px] bg-white border border-[#D4DDD7] text-[#5C6B62] hover:text-[#17211B]"
+              className="p-1.5 rounded-[6px] bg-[#0B140F] border border-[#263C30] text-[#8FA196] hover:text-[#EAE6DF]"
               aria-label="Zoom out 3D engine"
               title="Zoom out"
             >
@@ -1118,7 +1118,7 @@ export function EngineLab3D({
             <button
               type="button"
               onClick={handleResetView}
-              className="px-2.5 py-1.5 rounded-[6px] bg-white border border-[#D4DDD7] text-[12px] text-[#5C6B62] hover:text-[#17211B] flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded-[6px] bg-[#0B140F] border border-[#263C30] text-[11px] font-mono-data uppercase tracking-wider text-[#8FA196] hover:text-[#EAE6DF] flex items-center gap-1"
               title="Reset 3D camera and assembly"
             >
               <RotateCcw size={13} strokeWidth={1.5} />
@@ -1132,23 +1132,23 @@ export function EngineLab3D({
       <div className="grid grid-cols-1 lg:grid-cols-12 relative">
         {/* Left: CAD Assembly Browser Tree */}
         {showBrowserTree && (
-          <div className="lg:col-span-3 bg-[#F8FAF9] border-b lg:border-b-0 lg:border-r border-[#E2E8E4] p-3 flex flex-col justify-between max-h-[540px] overflow-y-auto">
+          <div className="lg:col-span-3 bg-[#0C1611] border-b lg:border-b-0 lg:border-r border-[#1C2E24] p-3 flex flex-col justify-between max-h-[540px] overflow-y-auto">
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[11px] font-mono-data uppercase tracking-wider text-[#5C6B62]">
+                <span className="text-[11px] font-mono-data uppercase tracking-wider text-[#8FA196]">
                   Model Browser · GLB
                 </span>
-                <span className="text-[11px] font-mono-data font-semibold text-[#16A34A]">36 Meshes</span>
+                <span className="text-[11px] font-mono-data font-semibold text-[#D86C2B]">36 Meshes</span>
               </div>
 
               {/* Active ML Prediction Highlight Banner */}
               <div
                 className={`rounded-[8px] border p-2.5 text-[12px] ${
                   activeCondition === "engine_knock"
-                    ? "border-[#FECACA] bg-[#FEE2E2] text-[#B91C1C]"
+                    ? "border-[#8C3B19] bg-[#2C150E] text-[#FDBA74]"
                     : activeCondition === "misfire"
-                      ? "border-[#FED7AA] bg-[#FFEDD5] text-[#C2410C]"
-                      : "border-[#86EFAC] bg-[#DCFCE7] text-[#15803D]"
+                      ? "border-[#784919] bg-[#2A1B0E] text-[#FCD34D]"
+                      : "border-[#23633B] bg-[#11291B] text-[#86EFAC]"
                 }`}
               >
                 <div className="font-semibold flex items-center justify-between">
@@ -1182,12 +1182,12 @@ export function EngineLab3D({
                       onMouseLeave={() => setHoveredId(null)}
                       className={`w-full px-2.5 py-2 rounded-[7px] text-left text-[12px] transition-all flex items-center justify-between gap-2 border ${
                         isSelected
-                          ? "bg-[#DCFCE7] border-[#16A34A] text-[#15803D]"
+                          ? "bg-[#172A20] border-[#D86C2B] text-[#F2E8D5]"
                           : isHighlighted
                             ? activeCondition === "engine_knock"
-                              ? "bg-[#FEE2E2]/80 border-[#FECACA] text-[#B91C1C] hover:bg-[#FEE2E2]"
-                              : "bg-[#FFEDD5]/85 border-[#FED7AA] text-[#C2410C] hover:bg-[#FFEDD5]"
-                            : "bg-transparent border-transparent text-[#334239] hover:bg-white"
+                              ? "bg-[#2C150E]/80 border-[#8C3B19] text-[#FDBA74] hover:bg-[#2C150E]"
+                              : "bg-[#2A1B0E]/85 border-[#784919] text-[#FCD34D] hover:bg-[#2A1B0E]"
+                            : "bg-transparent border-transparent text-[#B8C5BD] hover:bg-[#122019]"
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -1196,12 +1196,12 @@ export function EngineLab3D({
                           strokeWidth={1.5}
                           className={
                             isSelected
-                              ? "text-[#16A34A] shrink-0"
+                              ? "text-[#D86C2B] shrink-0"
                               : isHighlighted
                                 ? activeCondition === "engine_knock"
-                                  ? "text-[#DC2626] shrink-0"
-                                  : "text-[#EA580C] shrink-0"
-                                : "text-[#7A8A80] shrink-0"
+                                  ? "text-[#EA580C] shrink-0"
+                                  : "text-[#F59E0B] shrink-0"
+                                : "text-[#6E8577] shrink-0"
                           }
                         />
                         <span className="truncate font-medium">{comp.name}</span>
@@ -1211,14 +1211,14 @@ export function EngineLab3D({
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-mono-data shrink-0 ${
                             activeCondition === "engine_knock"
-                              ? "bg-[#FECACA] text-[#B91C1C]"
-                              : "bg-[#FED7AA] text-[#C2410C]"
+                              ? "bg-[#431A0D] text-[#FDBA74]"
+                              : "bg-[#3F260D] text-[#FCD34D]"
                           }`}
                         >
                           Inspect
                         </span>
                       ) : (
-                        <span className="font-mono-data text-[10px] text-[#7A8A80]">
+                        <span className="font-mono-data text-[10px] text-[#7C8F83]">
                           {comp.partCount}x
                         </span>
                       )}
@@ -1228,7 +1228,7 @@ export function EngineLab3D({
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#E2E8E4] text-[11px] text-[#7A8A80] flex items-center justify-between font-mono-data">
+            <div className="pt-3 border-t border-[#1C2E24] text-[11px] text-[#7C8F83] flex items-center justify-between font-mono-data">
               <span>ASSET: I4_DOHC.GLB</span>
               <span>SCALE 1:1</span>
             </div>
@@ -1419,21 +1419,21 @@ export function EngineLab3D({
 
         {/* Right: Component Inspection & ML Correlation Drawer (Opens when a 3D component is clicked) */}
         {selectedSpec && (
-          <div className="lg:col-span-4 bg-[#F8FAF9] border-t lg:border-t-0 lg:border-l border-[#E2E8E4] p-5 flex flex-col justify-between max-h-[540px] overflow-y-auto space-y-4">
+          <div className="lg:col-span-4 bg-[#0C1611] border-t lg:border-t-0 lg:border-l border-[#1C2E24] p-5 flex flex-col justify-between max-h-[540px] overflow-y-auto space-y-4">
             <div className="space-y-4">
-              <div className="flex items-start justify-between gap-2 border-b border-[#E2E8E4] pb-3">
+              <div className="flex items-start justify-between gap-2 border-b border-[#1C2E24] pb-3">
                 <div>
-                  <span className="text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#16A34A]">
+                  <span className="text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#D86C2B]">
                     {selectedSpec.categoryLabel}
                   </span>
-                  <h4 className="text-[17px] font-semibold text-[#17211B] mt-0.5">
+                  <h4 className="text-[17px] font-semibold text-[#EAE6DF] mt-0.5">
                     {selectedSpec.name}
                   </h4>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}
-                  className="text-[12px] text-[#5C6B62] hover:text-[#17211B] px-2 py-1 rounded bg-white border border-[#D4DDD7]"
+                  className="text-[11px] font-mono-data uppercase tracking-wider text-[#8FA196] hover:text-[#EAE6DF] px-2.5 py-1 rounded bg-[#122019] border border-[#284033]"
                 >
                   Close
                 </button>
@@ -1444,8 +1444,8 @@ export function EngineLab3D({
                 <div
                   className={`rounded-[8px] border p-3 space-y-1.5 text-[12px] ${
                     activeCondition === "engine_knock"
-                      ? "border-[#FECACA] bg-[#FEE2E2] text-[#B91C1C]"
-                      : "border-[#FED7AA] bg-[#FFEDD5] text-[#C2410C]"
+                      ? "border-[#8C3B19] bg-[#2C150E] text-[#FDBA74]"
+                      : "border-[#784919] bg-[#2A1B0E] text-[#FCD34D]"
                   }`}
                 >
                   <div className="font-semibold flex items-center gap-1.5">
@@ -1462,11 +1462,11 @@ export function EngineLab3D({
                   </p>
                 </div>
               ) : (
-                <div className="rounded-[8px] border border-[#BBF7D0] bg-[#DCFCE7]/50 p-3 text-[12px] text-[#334239] flex items-center gap-2">
-                  <CheckCircle2 size={15} className="text-[#16A34A] shrink-0" />
+                <div className="rounded-[8px] border border-[#23633B] bg-[#11291B]/60 p-3 text-[12px] text-[#B8C5BD] flex items-center gap-2">
+                  <CheckCircle2 size={15} className="text-[#4ADE80] shrink-0" />
                   <span>
                     Not flagged as a primary inspection area for the current{" "}
-                    <strong className="text-[#17211B]">{predictionToLabel(activeCondition)}</strong>{" "}
+                    <strong className="text-[#F2E8D5]">{predictionToLabel(activeCondition)}</strong>{" "}
                     prediction.
                   </span>
                 </div>
@@ -1474,15 +1474,15 @@ export function EngineLab3D({
 
               {/* Engineering Metadata */}
               <div className="grid grid-cols-2 gap-2 text-[12px] font-mono-data">
-                <div className="rounded-[6px] bg-white border border-[#E2E8E4] p-2.5">
-                  <div className="text-[10px] text-[#5C6B62]">QUANTITY</div>
-                  <div className="text-[#17211B] font-semibold mt-0.5">
+                <div className="rounded-[6px] bg-[#111E17] border border-[#1E3327] p-2.5">
+                  <div className="text-[10px] text-[#7C8F83]">QUANTITY</div>
+                  <div className="text-[#EAE6DF] font-semibold mt-0.5">
                     {selectedSpec.partCount} {selectedSpec.partCount === 1 ? "Assembly" : "Units"}
                   </div>
                 </div>
-                <div className="rounded-[6px] bg-white border border-[#E2E8E4] p-2.5">
-                  <div className="text-[10px] text-[#5C6B62]">INSPECTION STATUS</div>
-                  <div className="text-[#16A34A] font-semibold mt-0.5">
+                <div className="rounded-[6px] bg-[#111E17] border border-[#1E3327] p-2.5">
+                  <div className="text-[10px] text-[#7C8F83]">INSPECTION STATUS</div>
+                  <div className="text-[#D86C2B] font-semibold mt-0.5">
                     {isHighlightedForPrediction(selectedSpec.id, activeCondition, confidenceTier)
                       ? "Priority Check"
                       : "Routine"}
@@ -1491,27 +1491,31 @@ export function EngineLab3D({
               </div>
 
               <div className="space-y-1.5 text-[13px]">
-                <div className="text-[12px] font-semibold text-[#5C6B62]">Mechanical Function</div>
-                <p className="text-[#334239] leading-relaxed">{selectedSpec.functionSummary}</p>
+                <div className="text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#8FA196]">
+                  Mechanical Function
+                </div>
+                <p className="text-[#B8C5BD] leading-relaxed">{selectedSpec.functionSummary}</p>
               </div>
 
               <div className="space-y-1.5 text-[13px]">
-                <div className="text-[12px] font-semibold text-[#5C6B62]">Acoustic Signature</div>
-                <p className="text-[#334239] leading-relaxed">{selectedSpec.acousticSignature}</p>
+                <div className="text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#8FA196]">
+                  Acoustic Signature
+                </div>
+                <p className="text-[#B8C5BD] leading-relaxed">{selectedSpec.acousticSignature}</p>
               </div>
 
               <div className="space-y-2">
-                <div className="text-[12px] font-semibold text-[#5C6B62] flex items-center gap-1.5">
-                  <Wrench size={13} className="text-[#16A34A]" />
+                <div className="text-[11px] font-mono-data uppercase tracking-wider font-semibold text-[#8FA196] flex items-center gap-1.5">
+                  <Wrench size={13} className="text-[#D86C2B]" />
                   <span>Recommended Component Checks</span>
                 </div>
                 <ul className="space-y-1.5">
                   {selectedSpec.inspectionSteps.map((step, i) => (
                     <li
                       key={i}
-                      className="rounded-[6px] bg-white border border-[#E2E8E4] px-3 py-2 text-[12px] text-[#17211B] flex items-start gap-2"
+                      className="rounded-[6px] bg-[#111E17] border border-[#1E3327] px-3 py-2 text-[12px] text-[#EAE6DF] flex items-start gap-2"
                     >
-                      <span className="font-mono-data font-semibold text-[#16A34A]">{i + 1}.</span>
+                      <span className="font-mono-data font-semibold text-[#D86C2B]">{i + 1}.</span>
                       <span>{step}</span>
                     </li>
                   ))}
@@ -1519,8 +1523,8 @@ export function EngineLab3D({
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#E2E8E4] text-[11px] text-[#5C6B62] flex items-center gap-1.5">
-              <Info size={13} className="text-[#16A34A] shrink-0" />
+            <div className="pt-3 border-t border-[#1C2E24] text-[11px] text-[#7C8F83] flex items-center gap-1.5">
+              <Info size={13} className="text-[#D86C2B] shrink-0" />
               <span>Material: {selectedSpec.materialSpec}</span>
             </div>
           </div>
@@ -1528,9 +1532,9 @@ export function EngineLab3D({
       </div>
 
       {/* ── Bottom Engineering Status Bar & Quick Subsystem Pills ────────────── */}
-      <div className="px-4 py-2.5 bg-[#F8FAF9] border-t border-[#E2E8E4] flex flex-wrap items-center justify-between gap-3 text-[12px]">
+      <div className="px-4 py-2.5 bg-[#0D1812] border-t border-[#1C2E24] flex flex-wrap items-center justify-between gap-3 text-[12px]">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[#5C6B62] font-mono-data text-[11px]">
+          <span className="text-[#7C8F83] font-mono-data text-[11px]">
             HIGHLIGHTED INSPECTION ZONES:
           </span>
           {highlightedSpecs.length === 0 ? (
@@ -1543,12 +1547,12 @@ export function EngineLab3D({
                 key={spec.id}
                 type="button"
                 onClick={() => setSelectedId(spec.id)}
-                className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors flex items-center gap-1.5 ${
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono-data uppercase tracking-wider font-semibold border transition-colors flex items-center gap-1.5 ${
                   selectedId === spec.id
-                    ? "bg-[#16A34A] text-white border-[#15803D]"
+                    ? "bg-[#C86B32] text-[#FFF5EC] border-[#E08A54]"
                     : activeCondition === "engine_knock"
-                      ? "bg-[#FEE2E2] border-[#FECACA] text-[#B91C1C] hover:bg-[#FECACA]/60"
-                      : "bg-[#FFEDD5] border-[#FED7AA] text-[#C2410C] hover:bg-[#FED7AA]/60"
+                      ? "bg-[#2C150E] border-[#8C3B19] text-[#FDBA74] hover:bg-[#3D1C12]"
+                      : "bg-[#2A1B0E] border-[#784919] text-[#FCD34D] hover:bg-[#3A2513]"
                 }`}
               >
                 <Flame size={11} />
@@ -1558,7 +1562,7 @@ export function EngineLab3D({
           )}
         </div>
 
-        <div className="text-[11px] text-[#5C6B62]">
+        <div className="text-[11px] text-[#7C8F83]">
           Screening indicator only — physical inspection required to confirm any component fault.
         </div>
       </div>
